@@ -7,7 +7,7 @@
 
 static void pmm_init();
 static void *pmm_alloc(size_t size);
-static _RegSet *pmm_free(void *ptr);
+static void pmm_free(void *ptr);
 
 MOD_DEF(pmm) {
     .init = pmm_init,
@@ -115,7 +115,7 @@ static void *pmm_alloc(size_t size){
 	return ret;
 }
 
-static _RegSet *pmm_free(void *ptr){
+static void pmm_free(void *ptr){
     pthread_mutex_lock(&mutex);
 	free_unsafe(ptr);
 	pthread_mutex_unlock(&mutex);
