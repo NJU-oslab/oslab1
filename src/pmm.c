@@ -1,8 +1,9 @@
 #include <os.h>
 #include <unistd.h>
 #include <stdint.h>
-
+/*
 #define MINMALLOC (8 << 10)
+#define HEAP_SIZE (64 * 1024 * 1024)
 
 static void pmm_init();
 static void *pmm_alloc(size_t size);
@@ -22,6 +23,8 @@ typedef union block {
 	}body;
 	long align;
 } Block;
+
+static char heap[HEAP_SIZE];
 
 static Block base;
 static Block *freep = NULL;
@@ -114,3 +117,4 @@ static void *pmm_alloc(size_t size){
 static void pmm_free(void *ptr){
 	free_unsafe(ptr);
 }
+*/

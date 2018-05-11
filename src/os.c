@@ -11,6 +11,7 @@ MOD_DEF(os) {
 };
 
 static void os_init() {
+  assert(0);
   for (const char *p = "Hello, OS World!\n"; *p; p++) {
     _putc(*p);
   }

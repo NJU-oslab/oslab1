@@ -2,6 +2,7 @@
 #define __OS_H__
 
 #include <kernel.h>
+#include "debug.h"
 
 static inline void puts(const char *p) {
   for (; *p; p++) {
