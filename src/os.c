@@ -11,12 +11,10 @@ MOD_DEF(os) {
 };
 
 static void os_init() {
-  TRACE_ENTRY;
   for (const char *p = "Hello, OS World!\n"; *p; p++) {
     _putc(*p);
   }
-  TRACE_EXIT;
-  assert(0);
+  Log("fuck %s", "You");
 }
 
 static void os_run() {
