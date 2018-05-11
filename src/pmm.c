@@ -1,5 +1,4 @@
 #include <os.h>
-#include <pthread.h>
 #include <unistd.h>
 #include <stdint.h>
 
@@ -26,7 +25,6 @@ typedef union block {
 
 static Block base;
 static Block *freep = NULL;
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 extern void *sbrk(intptr_t increment);
 
 static void free_unsafe(void *ptr) {
@@ -109,14 +107,10 @@ static void pmm_init(){
 }
 
 static void *pmm_alloc(size_t size){
-    pthread_mutex_lock(&mutex);
 	void *ret = malloc_unsafe(size);
-	pthread_mutex_unlock(&mutex);
 	return ret;
 }
 
 static void pmm_free(void *ptr){
-    pthread_mutex_lock(&mutex);
 	free_unsafe(ptr);
-	pthread_mutex_unlock(&mutex);
 }
