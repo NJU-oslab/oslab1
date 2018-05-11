@@ -3,7 +3,7 @@
 
 #include <kernel.h>
 #include "debug.h"
-#include "os.h"
+#include "libc.h"
 
 static inline void puts(const char *p) {
   for (; *p; p++) {
