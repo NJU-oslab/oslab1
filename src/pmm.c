@@ -119,5 +119,4 @@ static void pmm_free(void *ptr){
     pthread_mutex_lock(&mutex);
 	free_unsafe(ptr);
 	pthread_mutex_unlock(&mutex);
-    return NULL;
 }
