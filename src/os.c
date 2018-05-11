@@ -16,6 +16,7 @@ static void os_init() {
     _putc(*p);
   }
   TRACE_EXIT;
+  assert(0);
 }
 
 static void os_run() {
