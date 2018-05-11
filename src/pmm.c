@@ -12,7 +12,7 @@ static _RegSet *pmm_free(void *ptr);
 MOD_DEF(pmm) {
     .init = pmm_init,
     .alloc = pmm_alloc,
-    .free = pmm_free,
+    .free = pmm_free
 };
 
 
