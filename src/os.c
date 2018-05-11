@@ -14,7 +14,6 @@ static void os_init() {
   for (const char *p = "Hello, OS World!\n"; *p; p++) {
     _putc(*p);
   }
-  Log("fuck %s", "You");
 }
 
 static void os_run() {
