@@ -11,7 +11,7 @@ static void kmt_sem_init(sem_t *sem, const char *name, int value);
 static void kmt_sem_wait(sem_t *sem);
 static void kmt_sem_signal(sem_t *sem);
 
-static spin_cnt = 0;
+static int spin_cnt = 0;
 
 
 MOD_DEF(kmt) {
