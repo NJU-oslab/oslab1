@@ -1,0 +1,3 @@
+struct spinlock{
+    int locked; 
+};

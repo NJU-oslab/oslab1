@@ -11,6 +11,8 @@ static void kmt_sem_init(sem_t *sem, const char *name, int value);
 static void kmt_sem_wait(sem_t *sem);
 static void kmt_sem_signal(sem_t *sem);
 
+static spin_cnt = 0;
+
 
 MOD_DEF(kmt) {
     .init = kmt_init,
@@ -38,13 +40,23 @@ static thread_t *kmt_schedule(){
     return NULL;
 }
 static void kmt_spin_init(spinlock_t *lk, const char *name){
-
+    lk->locked = 0;
 }
 static void kmt_spin_lock(spinlock_t *lk){
-
+    if (lk->locked == 0){
+        lk->locked = 1;
+        spin_cnt ++;
+        if (spin_cnt > 0 && _intr_read() == 1)
+            _intr_write(0);
+    }
 }
 static void kmt_spin_unlock(spinlock_t *lk){
-
+    if (lk->locked == 1){
+        lk->locked = 0;
+        spin_cnt --;
+        if (spin_cnt <= 0 && _intr_read() == 0)
+            _intr_write(1);
+    }
 }
 static void kmt_sem_init(sem_t *sem, const char *name, int value){
 

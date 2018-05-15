@@ -4,6 +4,8 @@
 #include <kernel.h>
 #include "debug.h"
 #include "libc.h"
+#include "kmt.h"
+#include "pmm.h"
 
 static inline void puts(const char *p) {
   for (; *p; p++) {
