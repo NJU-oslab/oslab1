@@ -45,6 +45,7 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     kmt_spin_lock(&thread_lock);
     thread_t *new_thread = NULL;
     new_thread->stack.start = pmm->alloc(MAX_STACK_SIZE);
+    Log("The thread has been allocated memory.");
     new_thread->stack.end = new_thread->stack.start + MAX_STACK_SIZE;
     new_thread->tf = _make(new_thread->stack, entry, arg);
     new_thread->runnable = 1;
