@@ -1,4 +1,5 @@
 #include "libc.h"
+#include "os.h"
 
 char * strcpy(char *dst, const char *src) {
   assert(dst != NULL);
