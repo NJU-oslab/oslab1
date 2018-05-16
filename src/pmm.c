@@ -1,20 +1,20 @@
-#include <os.h>
+#include "os.h"
 #include <unistd.h>
 #include <stdint.h>
-/*
-#define MINMALLOC (8 << 10)
-#define HEAP_SIZE (64 * 1024 * 1024)
 
 static void pmm_init();
 static void *pmm_alloc(size_t size);
 static void pmm_free(void *ptr);
-*/
+
+static spinlock_t pmm_lock;
+static void *cur = _heap.start;
+
 MOD_DEF(pmm) {
- //   .init = pmm_init,
- //   .alloc = pmm_alloc,
- //   .free = pmm_free
+    .init = pmm_init,
+    .alloc = pmm_alloc,
+    .free = pmm_free
 };
-/*
+
 
 typedef union block {
 	struct {
@@ -24,11 +24,8 @@ typedef union block {
 	long align;
 } Block;
 
-static char heap[HEAP_SIZE];
-
 static Block base;
 static Block *freep = NULL;
-extern void *sbrk(intptr_t increment);
 
 static void free_unsafe(void *ptr) {
 	Block* current, *head;
@@ -59,10 +56,12 @@ static void free_unsafe(void *ptr) {
 static Block* allocate_new(size_t size) {
 	void *new_mem;
 	Block *new_block;
-	if (size < MINMALLOC)
-		size = MINMALLOC;
-	if ((new_mem = sbrk(size)) == (void*)-1)
+	if (size + cur > _heap.end)
 		return NULL;
+	else {
+		new_mem = cur;
+		cur += size;
+	}
 	new_block = (Block *)new_mem;
 	new_block->body.size = size;
 	free_unsafe((void*)(new_block+1));
@@ -107,14 +106,18 @@ static void* malloc_unsafe(size_t size) {
 
 
 static void pmm_init(){
+	kmt->spin_init(&pmm_lock, "pmm_lock");
 }
 
 static void *pmm_alloc(size_t size){
+	kmt->spin_lock(&pmm_lock);
 	void *ret = malloc_unsafe(size);
+	kmt->spin_unlock(&pmm_lock);
 	return ret;
 }
 
 static void pmm_free(void *ptr){
+	kmt->spin_lock(&pmm_lock);
 	free_unsafe(ptr);
+	kmt->spin_unlock(&pmm_lock);
 }
-*/
