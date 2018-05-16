@@ -75,7 +75,7 @@ static void cond_wait(cond_t *cond, spinlock_t *lk){
 }
 
 static void cond_signal(cond_t *cond){
-    cond_node_t *current_cond_node;
+ //   cond_node_t *current_cond_node;
  /*   while (current_cond_node != NULL){
         
     }*/
