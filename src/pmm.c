@@ -122,6 +122,7 @@ static void *pmm_alloc(size_t size){
 	TRACE_ENTRY;
 	kmt->spin_lock(&pmm_lock);
 	void *ret = malloc_unsafe(size);
+	Log("malloc's ret: 0x%x", ret);
 	kmt->spin_unlock(&pmm_lock);
 	TRACE_EXIT;
 	return ret;
