@@ -28,6 +28,7 @@ static void alloc_test() {
   pmm->alloc(8192);
   pmm->alloc(400);
   pmm->alloc(1023);
+  Log("_heap.end: %d", _heap.end);
 }
 
 static void os_run() {
