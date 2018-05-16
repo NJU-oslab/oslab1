@@ -54,6 +54,7 @@ void thread_test() {
   for (i = 0; i < 5; i++){
     finished_thread[i] = 0;
     kmt->create(&test_thread[i], thread_test_func, (void *)i);
+    Log("Thread %d created.", i);
   }
   while (1){
     int j;
