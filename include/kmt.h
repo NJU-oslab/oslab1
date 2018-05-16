@@ -16,7 +16,7 @@ struct thread{
 
 typedef struct cond_node{
     struct thread waiting_thread;
-    struct spinlock mutex;
+    struct spinlock *mutex;
     struct cond_node *next;
 } cond_node_t;
 
