@@ -1,5 +1,5 @@
 #include "libc.h"
-#include "am.h"
+#include "os.h"
 
 int strncmp(const char *s1, const char *s2, size_t n) {
   assert(s1 != NULL && s2 != NULL && n >= 0);

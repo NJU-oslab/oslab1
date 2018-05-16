@@ -1,5 +1,5 @@
 #include "libc.h"
-#include "am.h"
+#include "os.h"
 
 void * memcpy(void *dst, const void *src, size_t n) {
   if (dst == NULL || src == NULL)

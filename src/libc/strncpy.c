@@ -1,5 +1,5 @@
 #include "libc.h"
-#include "am.h"
+#include "os.h"
 
 char * strncpy(char *dst, const char *src, size_t n) {
   assert(dst != NULL);

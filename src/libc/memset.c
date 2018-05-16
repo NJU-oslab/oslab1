@@ -1,5 +1,5 @@
 #include "libc.h"
-#include "am.h"
+#include "os.h"
 
 void * memset(void *b, int c, size_t n) {
   if (n < 0 || b == NULL) return NULL;

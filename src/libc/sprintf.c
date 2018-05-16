@@ -1,5 +1,5 @@
 #include <stdarg.h>
-#include <am.h>
+#include "os.h"
 #include "libc.h"
 
 static int printf_d(char * out, int d, int comp_flag, char comp_char, int strict_len, int left_flag) {
