@@ -38,7 +38,7 @@ static void kmt_init(){
 }
 static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     _Area stack;
-    thread_t *new_thread;
+    thread_t *new_thread = NULL;
     stack.start = new_thread->stack;
     stack.end = stack.start + sizeof(new_thread->stack);
     new_thread->tf = _make(stack, entry, arg);
@@ -112,7 +112,7 @@ static void kmt_spin_unlock(spinlock_t *lk){
 }
 
 static void cond_wait(cond_t *cond, spinlock_t *lk){
-    cond_node_t *new_cond_node;
+    cond_node_t *new_cond_node = NULL;
     kmt_spin_unlock(lk);
 
     current_thread->runnable = 0;
@@ -124,7 +124,7 @@ static void cond_wait(cond_t *cond, spinlock_t *lk){
 }
 
 static void cond_signal(cond_t *cond){
-    cond_node_t *current_cond_node;
+    cond_node_t *current_cond_node = cond->q;
     while (current_cond_node != NULL){
         if (current_cond_node->waiting_thread !=NULL && current_cond_node->waiting_thread->runnable == 0){
             current_cond_node->waiting_thread->runnable = 1;
