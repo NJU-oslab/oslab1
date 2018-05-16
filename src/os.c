@@ -24,11 +24,12 @@ static void test_run() {
   for (int i = 0; i < 20; i++){
     Log("arr[%d]: %d", i, arr[i]);
   }
+  pmm->free(arr);
 }
 
 static void os_run() {
   _intr_write(1); // enable interrupt
-  test_run();
+  alloc_test();
 //  while (1) ; // should never return
 }
 
