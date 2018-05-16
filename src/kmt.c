@@ -1,5 +1,5 @@
 #include <os.h>
-#include <string.h>
+#include "libc.h"
 
 static void kmt_init();
 static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg);
