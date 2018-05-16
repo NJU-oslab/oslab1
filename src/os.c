@@ -29,9 +29,9 @@ void alloc_test() {
     Log("arr[%d]: %d", i, arr[i]);
   }
   pmm->free(arr);
-  pmm->alloc(8192);
-  pmm->alloc(400);
-  pmm->alloc(1023);
+  pmm->alloc(16);
+  pmm->alloc(20);
+  pmm->alloc(24);
   Log("_heap.end: 0x%x", _heap.end);
   Log("alloc_test end.\n============================");
 }
