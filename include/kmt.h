@@ -4,13 +4,24 @@ struct spinlock{
     int locked; 
 };
 
-struct cond_node{
-    struct cond_node *next;
-};
-
 struct semaphore{
     int count;
     char name[MAX_NAME_LEN];
     struct spinlock mutex;
-    struct cond_node *q;
 };
+
+struct thread{
+    int sleeping;
+};
+
+typedef struct cond_node{
+    struct thread waiting_thread;
+    struct spinlock mutex;
+    struct cond_node *next;
+} cond_node_t;
+
+typedef struct cond{
+    struct cond_node *q;
+} cond_t;
+
+

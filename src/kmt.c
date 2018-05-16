@@ -13,6 +13,8 @@ static void kmt_sem_wait(sem_t *sem);
 static void kmt_sem_signal(sem_t *sem);
 
 static int spin_cnt = 0;
+static cond_t cond;
+thread_t current_thread;
 
 
 MOD_DEF(kmt) {
@@ -60,23 +62,45 @@ static void kmt_spin_unlock(spinlock_t *lk){
     }
 }
 
+static void cond_wait(cond_t *cond, spinlock_t *lk){
+    cond_node_t *new_cond_node;
+    kmt_spin_unlock(&lk);
+
+    current_thread.sleeping = 1;
+    new_cond_node->waiting_thread = current_thread;
+    new_cond_node->mutex = lk;
+    new_cond_node->next = cond->q;
+
+    cond->q = new_cond_node;
+}
+
+static void cond_signal(cond_t *cond){
+    if (cond->q != NULL && cond->q->waiting_thread.sleeping == 1){
+        cond->q->waiting_thread.sleeping = 0;
+        if (cond->q->next != NULL)
+            cond->q = cond->q->next;
+    } 
+}
+
 static void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->count = value;
  //   sem->name = name;
     strcpy(sem->name, name);
     kmt_spin_init(&sem->mutex, name);
 }
+
 static void kmt_sem_wait(sem_t *sem){
     kmt_spin_lock(&sem->mutex);
     while (sem->count == 0){
-        //TODO:signal
+        cond_wait(&cond, &sem->mutex);
     }
     sem->count --;
     kmt_spin_unlock(&sem->mutex);
 }
+
 static void kmt_sem_signal(sem_t *sem){
     kmt_spin_lock(&sem->mutex);
     sem->count++;
-
+    cond_signal(&cond);
     kmt_spin_unlock(&sem->mutex);
 }
