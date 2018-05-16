@@ -14,7 +14,7 @@ static void kmt_sem_signal(sem_t *sem);
 
 static int spin_cnt = 0;
 static cond_t cond;
-thread_t current_thread;
+static thread_t current_thread;
 
 
 MOD_DEF(kmt) {
