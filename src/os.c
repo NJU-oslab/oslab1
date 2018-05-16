@@ -25,6 +25,9 @@ static void alloc_test() {
     Log("arr[%d]: %d", i, arr[i]);
   }
   pmm->free(arr);
+  pmm->alloc(8192);
+  pmm->alloc(400);
+  pmm->alloc(1023);
 }
 
 static void os_run() {
