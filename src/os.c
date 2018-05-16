@@ -98,7 +98,7 @@ static _RegSet *os_interrupt(_Event ev, _RegSet *regs) {
   if (ev.event == _EVENT_IRQ_IODEV) Log("_EVENT_IRQ_IODEV");
   if (ev.event == _EVENT_ERROR) {
     Log("_EVENT_IRQ_ERROR");
-//    _halt(1);
+    _halt(1);
   }
   return NULL; // this is allowed by AM
 }
