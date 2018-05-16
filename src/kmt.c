@@ -14,8 +14,9 @@ static void kmt_sem_signal(sem_t *sem);
 
 static int spin_cnt = 0;
 static cond_t cond;
-//static thread_t current_thread;
-
+thread_t *current_thread = NULL;
+thread_t *head = NULL;
+static int thread_cnt = 0;
 
 MOD_DEF(kmt) {
     .init = kmt_init,
@@ -31,16 +32,64 @@ MOD_DEF(kmt) {
 };
 
 static void kmt_init(){
-
+    current_thread = NULL;
+    head = NULL;
+    thread_cnt = 0;
 }
 static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
+    _Area stack;
+    thread_t *new_thread;
+    stack.start = new_thread->stack;
+    stack.end = stack.start + sizeof(new_thread->stack);
+    new_thread->tf = _make(stack, entry, arg);
+    new_thread->runnable = 1;
+    new_thread->tid = thread_cnt++;
+    if (head == NULL){
+        new_thread->next = NULL;
+        head = new_thread;
+    }
+    else{
+        new_thread->next = head;
+        head = new_thread;
+    }
+
     return 0;
 }
 static void kmt_teardown(thread_t *thread){
-
+    thread_t *cur = head;
+    if (cur == NULL){
+        assert(0);
+    }
+    else if (cur->next == NULL){
+        if (cur->tid == thread->tid){
+            head = NULL;
+        }
+    }
+    else{
+        while (cur->next != NULL){
+            if (cur->next->tid == thread->tid){
+                thread_t *p = cur->next;
+                cur->next = p->next;
+            }
+        }
+    }
 }
 static thread_t *kmt_schedule(){
-    return NULL;
+    thread_t *next_thread;
+    if (current_thread->next == NULL)
+        next_thread = head;
+    else
+        next_thread = current_thread->next;
+    while (1){
+        if (next_thread->runnable == 1)
+            break;
+        if (current_thread->next != NULL)
+            next_thread = current_thread->next;
+        else
+            next_thread = head;
+    }
+    current_thread = next_thread;
+    return next_thread;
 }
 static void kmt_spin_init(spinlock_t *lk, const char *name){
     lk->locked = 0;
@@ -63,22 +112,25 @@ static void kmt_spin_unlock(spinlock_t *lk){
 }
 
 static void cond_wait(cond_t *cond, spinlock_t *lk){
-//    cond_node_t *new_cond_node;
-//    kmt_spin_unlock(lk);
+    cond_node_t *new_cond_node;
+    kmt_spin_unlock(lk);
 
- //   current_thread.sleeping = 1;
-    //new_cond_node->waiting_thread = current_thread;
-   // new_cond_node->mutex = lk;
-   // new_cond_node->next = cond->q;
+    current_thread->runnable = 0;
+    new_cond_node->waiting_thread = current_thread;
+    new_cond_node->mutex = lk;
+    new_cond_node->next = cond->q;
 
-  //  cond->q = new_cond_node;
+    cond->q = new_cond_node;
 }
 
 static void cond_signal(cond_t *cond){
- //   cond_node_t *current_cond_node;
- /*   while (current_cond_node != NULL){
-        
-    }*/
+    cond_node_t *current_cond_node;
+    while (current_cond_node != NULL){
+        if (current_cond_node->waiting_thread !=NULL && current_cond_node->waiting_thread->runnable == 0){
+            current_cond_node->waiting_thread->runnable = 1;
+            break;
+        }
+    }
 }
 
 static void kmt_sem_init(sem_t *sem, const char *name, int value){
