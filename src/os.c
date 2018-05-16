@@ -1,5 +1,4 @@
-#include <os.h>
-#include "debug.h"
+#include "os.h"
 
 static void os_init();
 static void os_run();
