@@ -54,6 +54,7 @@ static void free_unsafe(void *ptr) {
 }
 
 static Block* allocate_new(size_t size) {
+	TRACE_ENTRY;
 	void *new_mem;
 	Block *new_block;
 	if (size + cur > _heap.end)
@@ -66,6 +67,7 @@ static Block* allocate_new(size_t size) {
 	new_block = (Block *)new_mem;
 	new_block->body.size = size;
 	free_unsafe((void*)(new_block+1));
+	TRACE_EXIT;
 	return freep;
 }
 
