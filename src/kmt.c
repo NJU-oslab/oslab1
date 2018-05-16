@@ -41,6 +41,7 @@ static void kmt_init(){
     kmt_spin_init(&sem_lock, "sem_lock");
 }
 static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
+    TRACE_ENTRY;
     kmt_spin_lock(&thread_lock);
     thread_t *new_thread = NULL;
     new_thread->stack.start = pmm->alloc(MAX_STACK_SIZE);
@@ -57,6 +58,7 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
         head = new_thread;
     }
     kmt_spin_unlock(&thread_lock);
+    TRACE_EXIT;
     return 0;
 }
 static void kmt_teardown(thread_t *thread){
