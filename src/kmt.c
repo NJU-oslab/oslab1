@@ -66,19 +66,19 @@ static void cond_wait(cond_t *cond, spinlock_t *lk){
     cond_node_t *new_cond_node;
     kmt_spin_unlock(lk);
 
-    current_thread.sleeping = 1;
+ //   current_thread.sleeping = 1;
     //new_cond_node->waiting_thread = current_thread;
-    new_cond_node->mutex = lk;
-    new_cond_node->next = cond->q;
+   // new_cond_node->mutex = lk;
+   // new_cond_node->next = cond->q;
 
-    cond->q = new_cond_node;
+  //  cond->q = new_cond_node;
 }
 
 static void cond_signal(cond_t *cond){
     cond_node_t *current_cond_node;
-    while (current_cond_node != NULL){
+ /*   while (current_cond_node != NULL){
         
-    }
+    }*/
 }
 
 static void kmt_sem_init(sem_t *sem, const char *name, int value){
