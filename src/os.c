@@ -31,9 +31,19 @@ static void alloc_test() {
   Log("_heap.end: 0x%x", _heap.end);
 }
 
+static void thread_test() {
+
+}
+
+static void sem_test() {
+  
+}
+
 static void os_run() {
   _intr_write(1); // enable interrupt
   alloc_test();
+  thread_test();
+  sem_test();
 //  while (1) ; // should never return
 }
 
