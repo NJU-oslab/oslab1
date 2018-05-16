@@ -7,7 +7,7 @@ static void *pmm_alloc(size_t size);
 static void pmm_free(void *ptr);
 
 static spinlock_t pmm_lock;
-static void *cur = _heap.start;
+static void *cur = NULL;
 
 MOD_DEF(pmm) {
     .init = pmm_init,
@@ -106,6 +106,7 @@ static void* malloc_unsafe(size_t size) {
 
 
 static void pmm_init(){
+	cur = _heap.start;
 	kmt->spin_init(&pmm_lock, "pmm_lock");
 }
 
