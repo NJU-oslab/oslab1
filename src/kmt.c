@@ -14,7 +14,7 @@ static void kmt_sem_signal(sem_t *sem);
 
 static int spin_cnt = 0;
 static cond_t cond;
-static thread_t current_thread;
+//static thread_t current_thread;
 
 
 MOD_DEF(kmt) {
@@ -63,8 +63,8 @@ static void kmt_spin_unlock(spinlock_t *lk){
 }
 
 static void cond_wait(cond_t *cond, spinlock_t *lk){
-    cond_node_t *new_cond_node;
-    kmt_spin_unlock(lk);
+//    cond_node_t *new_cond_node;
+//    kmt_spin_unlock(lk);
 
  //   current_thread.sleeping = 1;
     //new_cond_node->waiting_thread = current_thread;
