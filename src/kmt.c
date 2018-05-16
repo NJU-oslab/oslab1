@@ -13,10 +13,12 @@ static void kmt_sem_wait(sem_t *sem);
 static void kmt_sem_signal(sem_t *sem);
 
 static int spin_cnt = 0;
-static cond_t cond;
-thread_t *current_thread = NULL;
-thread_t *head = NULL;
+static int intr_ready = 0;
+static thread_t *current_thread = NULL;
+static thread_t *head = NULL;
 static int thread_cnt = 0;
+static spinlock_t thread_lock;
+static spinlock_t sem_lock;
 
 MOD_DEF(kmt) {
     .init = kmt_init,
@@ -35,13 +37,15 @@ static void kmt_init(){
     current_thread = NULL;
     head = NULL;
     thread_cnt = 0;
+    kmt_spin_init(&thread_lock, "thread_lock");
+    kmt_spin_init(&sem_lock, "sem_lock");
 }
 static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
-    _Area stack;
+    kmt_spin_lock(&thread_lock);
     thread_t *new_thread = NULL;
-    stack.start = new_thread->stack;
-    stack.end = stack.start + sizeof(new_thread->stack);
-    new_thread->tf = _make(stack, entry, arg);
+    new_thread->stack.start = pmm->alloc(MAX_STACK_SIZE);
+    new_thread->stack.end = new_thread->stack.start + MAX_STACK_SIZE;
+    new_thread->tf = _make(new_thread->stack, entry, arg);
     new_thread->runnable = 1;
     new_thread->tid = thread_cnt++;
     if (head == NULL){
@@ -52,27 +56,38 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
         new_thread->next = head;
         head = new_thread;
     }
-
+    kmt_spin_unlock(&thread_lock);
     return 0;
 }
 static void kmt_teardown(thread_t *thread){
+    kmt_spin_lock(&thread_lock);
     thread_t *cur = head;
+    int find_flag = 0;
     if (cur == NULL){
+        Log("There's no thread that can be recycled.");
         assert(0);
     }
-    else if (cur->next == NULL){
-        if (cur->tid == thread->tid){
-            head = NULL;
-        }
+    else if (cur == thread){
+        pmm->free(head->stack.start);
+        head = NULL;
+        find_flag = 1;
     }
-    else{
+    else {
         while (cur->next != NULL){
-            if (cur->next->tid == thread->tid){
+            if (cur->next == thread){
                 thread_t *p = cur->next;
+                pmm->free(cur->next->stack.start);
                 cur->next = p->next;
+                find_flag = 1;
+                break;
             }
+            cur = cur->next;
         }
     }
+    if (find_flag == 0){
+        Log("Cannot find the thread you want to recycle.");
+    }
+    kmt_spin_unlock(&thread_lock);
 }
 static thread_t *kmt_schedule(){
     thread_t *next_thread;
@@ -81,7 +96,7 @@ static thread_t *kmt_schedule(){
     else
         next_thread = current_thread->next;
     while (1){
-        if (next_thread->runnable == 1)
+        if (next_thread != NULL && next_thread->runnable == 1)
             break;
         if (current_thread->next != NULL)
             next_thread = current_thread->next;
@@ -93,64 +108,62 @@ static thread_t *kmt_schedule(){
 }
 static void kmt_spin_init(spinlock_t *lk, const char *name){
     lk->locked = 0;
+    strncpy(lk->name, name, MAX_NAME_LEN);
 }
 static void kmt_spin_lock(spinlock_t *lk){
+    int intr_status = _intr_read();
+    _intr_write(0);
     if (lk->locked == 0){
         lk->locked = 1;
         spin_cnt ++;
-        if (spin_cnt > 0 && _intr_read() == 1)
-            _intr_write(0);
+        if (spin_cnt == 0)
+            intr_ready = intr_status;
+    }
+    else{
+        Log("The spinlock has been locked!");
     }
 }
 static void kmt_spin_unlock(spinlock_t *lk){
     if (lk->locked == 1){
         lk->locked = 0;
         spin_cnt --;
-        if (spin_cnt <= 0 && _intr_read() == 0)
+        if (spin_cnt == 0 && intr_ready == 1)
             _intr_write(1);
     }
-}
-
-static void cond_wait(cond_t *cond, spinlock_t *lk){
-    cond_node_t *new_cond_node = NULL;
-    kmt_spin_unlock(lk);
-
-    current_thread->runnable = 0;
-    new_cond_node->waiting_thread = current_thread;
-    new_cond_node->mutex = lk;
-    new_cond_node->next = cond->q;
-
-    cond->q = new_cond_node;
-}
-
-static void cond_signal(cond_t *cond){
-    cond_node_t *current_cond_node = cond->q;
-    while (current_cond_node != NULL){
-        if (current_cond_node->waiting_thread !=NULL && current_cond_node->waiting_thread->runnable == 0){
-            current_cond_node->waiting_thread->runnable = 1;
-            break;
-        }
+    else{
+        Log("The spinlock has been unlocked!");
     }
 }
 
 static void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->count = value;
-    strcpy(sem->name, name);
-    kmt_spin_init(&sem->mutex, name);
+    strncpy(sem->name, name, MAX_NAME_LEN);
 }
 
 static void kmt_sem_wait(sem_t *sem){
-    kmt_spin_lock(&sem->mutex);
+    kmt_spin_lock(&sem_lock);
     while (sem->count == 0){
-        cond_wait(&cond, &sem->mutex);
+        current_thread->runnable = 0;
+        current_thread->waiting_sem = sem;
+        kmt_spin_unlock(&sem_lock);
+        while (current_thread->runnable == 0);
+        kmt_spin_lock(&sem_lock);
     }
     sem->count --;
-    kmt_spin_unlock(&sem->mutex);
+    kmt_spin_unlock(&sem_lock);
 }
 
 static void kmt_sem_signal(sem_t *sem){
-    kmt_spin_lock(&sem->mutex);
+    thread_t *cur = head;
+    kmt_spin_lock(&sem_lock);
     sem->count++;
-    cond_signal(&cond);
-    kmt_spin_unlock(&sem->mutex);
+    while (cur != NULL){
+        if (cur->runnable == 0 && cur->waiting_sem == sem){
+            cur->runnable = 1;
+            cur->waiting_sem = NULL;
+            break;
+        }
+        cur = cur->next;
+    }
+    kmt_spin_unlock(&sem_lock);
 }
