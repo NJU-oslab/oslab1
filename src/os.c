@@ -17,8 +17,13 @@ static void os_init() {
 }
 
 static void test_run() {
-  pmm->alloc(20);
-  pmm->alloc(1024);
+  int *arr = (int*)pmm->alloc(20 * sizeof(int));
+  for (int i = 0; i < 20; i++){
+    arr[i] = i;
+  }
+  for (int i = 0; i < 20; i++){
+    Log("arr[%d]: %d", i, arr[i]);
+  }
 }
 
 static void os_run() {
