@@ -16,9 +16,15 @@ static void os_init() {
   }
 }
 
+static void test_run() {
+  pmm->alloc(20);
+  pmm->alloc(1024);
+}
+
 static void os_run() {
   _intr_write(1); // enable interrupt
-  while (1) ; // should never return
+  test_run();
+//  while (1) ; // should never return
 }
 
 static _RegSet *os_interrupt(_Event ev, _RegSet *regs) {
