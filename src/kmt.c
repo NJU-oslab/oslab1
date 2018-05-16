@@ -13,8 +13,6 @@ static void kmt_sem_wait(sem_t *sem);
 static void kmt_sem_signal(sem_t *sem);
 
 static int spin_cnt = 0;
-static int sem_cnt = 0;
-static int static_cond = 0;
 
 
 MOD_DEF(kmt) {
