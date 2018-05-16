@@ -62,6 +62,7 @@ static Block* allocate_new(size_t size) {
 		new_mem = cur;
 		cur += size;
 	}
+	Log("new_mem: %d", new_mem);
 	new_block = (Block *)new_mem;
 	new_block->body.size = size;
 	free_unsafe((void*)(new_block+1));
