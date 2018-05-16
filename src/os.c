@@ -11,7 +11,6 @@ MOD_DEF(os) {
 };
 
 static void os_init() {
-  Log("fuck");
   for (const char *p = "Hello, OS World!\n"; *p; p++) {
     _putc(*p);
   }
