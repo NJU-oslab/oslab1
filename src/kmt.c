@@ -84,7 +84,6 @@ static void cond_signal(cond_t *cond){
 
 static void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->count = value;
- //   sem->name = name;
     strcpy(sem->name, name);
     kmt_spin_init(&sem->mutex, name);
 }
