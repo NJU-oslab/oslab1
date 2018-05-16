@@ -16,7 +16,7 @@ static void os_init() {
   }
 }
 
-static void test_run() {
+static void alloc_test() {
   int *arr = (int*)pmm->alloc(20 * sizeof(int));
   for (int i = 0; i < 20; i++){
     arr[i] = i;
