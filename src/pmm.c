@@ -28,6 +28,7 @@ static Block base;
 static Block *freep = NULL;
 
 static void free_unsafe(void *ptr) {
+	TRACE_ENTRY;
 	Block* current, *head;
 	head = (Block *)ptr - 1;
 	current = freep;
@@ -51,6 +52,7 @@ static void free_unsafe(void *ptr) {
 	else
 		current->body.next = head;
 	freep = current;
+	TRACE_EXIT;
 }
 
 static Block* allocate_new(size_t size) {
@@ -76,6 +78,7 @@ static size_t auto_align(size_t size) {
 }
 
 static void* malloc_unsafe(size_t size) {
+	TRACE_ENTRY;
 	Block *current, *prev;
 	size = auto_align(size);
 	prev = freep;
@@ -97,9 +100,11 @@ static void* malloc_unsafe(size_t size) {
 				prev->body.next = current->body.next;
 				freep = prev;
 			}
+			TRACE_EXIT;
 			return (void *)(current+1);
 		}
 		if (current == freep && (current = allocate_new(size)) == NULL){
+			TRACE_EXIT;
 			return NULL;
 		}
 		prev = current;
