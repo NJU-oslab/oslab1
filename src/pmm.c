@@ -136,6 +136,7 @@ static void *pmm_alloc(size_t size){
 	void *ret = malloc_unsafe(size);
 	Log("malloc's ret: 0x%x", ret);
 	kmt->spin_unlock(&pmm_lock);
+	Log("RET mod 2^k = %d", (size_t)ret %mul);
 	assert((size_t)ret % mul == 0);
 	TRACE_EXIT;
 	return ret;
