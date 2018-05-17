@@ -67,6 +67,7 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     thread_t *cur = head;
     while (cur != NULL){
         Log("thread %d: runnbale: %d", cur->tid, cur->runnable);
+        cur = cur->next;
     }
 
 
