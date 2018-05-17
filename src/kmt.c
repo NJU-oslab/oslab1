@@ -13,7 +13,7 @@ static void kmt_sem_wait(sem_t *sem);
 static void kmt_sem_signal(sem_t *sem);
 
 static int spin_cnt = 0;
-static int intr_ready = 0;
+//static int intr_ready = 0;
 static thread_t *current_thread = NULL;
 static thread_t *head = NULL;
 static int thread_cnt = 0;
@@ -144,7 +144,6 @@ static void kmt_spin_init(spinlock_t *lk, const char *name){
     strncpy(lk->name, name, MAX_NAME_LEN);
 }
 static void kmt_spin_lock(spinlock_t *lk){
-    int intr_status = _intr_read();
     _intr_write(0);
     if (lk->locked == 0){
         lk->locked = 1;
@@ -160,7 +159,7 @@ static void kmt_spin_unlock(spinlock_t *lk){
     if (lk->locked == 1){
         lk->locked = 0;
         spin_cnt --;
-        if (spin_cnt == 0 && intr_ready == 1)
+        if (spin_cnt == 0)
             _intr_write(1);
     }
     else{
