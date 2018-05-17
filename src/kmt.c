@@ -104,6 +104,17 @@ static void kmt_teardown(thread_t *thread){
     if (find_flag == 0){
         Log("Cannot find the thread you want to recycle.");
     }
+
+    /* print threads' information*/
+    Log("------------------------------------------");
+    Log("Now, the thread information is as follows.");
+    thread_t *cur = head;
+    while (cur != NULL){
+        Log("thread %d: runnbale: %d", cur->tid, cur->runnable);
+        cur = cur->next;
+    }
+    Log("------------------------------------------");
+
     kmt_spin_unlock(&thread_lock);
 }
 static thread_t *kmt_schedule(){
