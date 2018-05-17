@@ -125,8 +125,8 @@ static thread_t *kmt_schedule(){
     if (current_thread == NULL)
         current_thread = head;
     thread_t *next_thread = current_thread;
-    if (current_thread != NULL)
-        Log("current_thread->tid: %d", current_thread->tid);
+ //   if (current_thread != NULL)
+ //       Log("current_thread->tid: %d", current_thread->tid);
     if (current_thread->next == NULL)
         next_thread = head;
     else
@@ -140,7 +140,6 @@ static thread_t *kmt_schedule(){
             next_thread = head;
     }
     current_thread = next_thread;
-    TRACE_EXIT;
     return next_thread;
 }
 static void kmt_spin_init(spinlock_t *lk, const char *name){
