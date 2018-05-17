@@ -103,7 +103,7 @@ static void* malloc_unsafe(size_t size) {
 			current = (Block *)((char *)current + current->body.size);
 			current->body.size = size;
 			while ((size_t)current % power != 0) {
-				current = (Block *)((char *)current - 1;
+				current = (Block *)((char *)current - 1);
 				current->body.size++;
 			}
 			freep = prev;
