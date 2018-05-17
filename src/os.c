@@ -103,7 +103,7 @@ static void os_run() {
 }
 
 static _RegSet *os_interrupt(_Event ev, _RegSet *regs) {
-  if (ev.event == _EVENT_IRQ_TIMER){
+  if (ev.event == _EVENT_IRQ_TIMER || ev.event == _EVENT_YIELD){
 //    Log("_EVENT_IRQ_TIMER");
     if (current_thread != NULL)
       current_thread->tf = regs;

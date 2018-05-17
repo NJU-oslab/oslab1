@@ -132,7 +132,7 @@ static thread_t *kmt_schedule(){
     else
         next_thread = current_thread->next;
     while (1){
-        printf("next_thread: 0x%x", next_thread);
+        printf("next_thread: 0x%x\n", next_thread);
         if (next_thread != NULL && next_thread->runnable == 1)
             break;
         if (current_thread->next != NULL)
@@ -178,6 +178,8 @@ static void kmt_sem_init(sem_t *sem, const char *name, int value){
 }
 
 static void kmt_sem_wait(sem_t *sem){
+    if (strcmp(current_thread->name, "consumer") == 0)
+        printf("consumer!\n");
     kmt_spin_lock(&sem_lock);
     Log("%s: sem_count: 0x%x",sem->name, sem->count);
     while (sem->count == 0){
