@@ -70,12 +70,16 @@ static void *pmm_alloc(size_t size) {
 		struct _Block *p = block;
 		while (p->next != NULL)
 		{
-			if (p->size >= size && p->free)
+			if (p->size >= size && p->free){
+				Log("ret: 0x%x", p->start);
 				return p->start;
+			}
 			p = p->next;
 		}
-		if (p->size >= size && p->free)
+		if (p->size >= size && p->free) {
+			Log("ret: 0x%x", p->start);
 			return p->start;
+		}
 		void *q = current;
 		while (((size_t)q) % align(digit(size + BLOCK_SIZE)) != 0) q++;
 		current = q + align(digit(size + BLOCK_SIZE));
