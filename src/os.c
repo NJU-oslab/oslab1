@@ -20,7 +20,7 @@ static void os_init() {
 }
 
 void alloc_test() {
-  Log("============================\nalloc_test begin...");
+  Log("alloc_test begin...");
   int *arr = (int*)pmm->alloc(20 * sizeof(int));
   for (int i = 0; i < 20; i++){
     arr[i] = i;
@@ -49,7 +49,7 @@ static void thread_test_func(void *tid){
 }
 
 void thread_test() {
-  Log("============================\nthread_test begin...");   
+  Log("thread_test begin...");   
   int i;
   for (i = 0; i < 5; i++){
     finished_thread[i] = 0;
@@ -74,7 +74,7 @@ void thread_test() {
 }
 
 void sem_test() {
-  Log("============================\nsem_test begin");
+  Log("sem_test begin");
 
   Log("sem_test end\n============================");
 }
@@ -89,11 +89,11 @@ static void os_run() {
 
 static _RegSet *os_interrupt(_Event ev, _RegSet *regs) {
   if (ev.event == _EVENT_IRQ_TIMER){
- //   Log("_EVENT_IRQ_TIMER");
-/*    if (current_thread != NULL)
+   // Log("_EVENT_IRQ_TIMER");
+    if (current_thread != NULL)
       current_thread->tf = regs;
     current_thread = kmt->schedule();
-    return current_thread->tf;*/
+    return current_thread->tf;
   } 
   if (ev.event == _EVENT_IRQ_IODEV) Log("_EVENT_IRQ_IODEV");
   if (ev.event == _EVENT_ERROR) {
