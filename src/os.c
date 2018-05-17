@@ -21,8 +21,8 @@ static void os_init() {
 }
 
 static void os_run() {
-  alloc_test();
-//  thread_test();
+//  alloc_test();
+  thread_test();
 //  sem_test();
   _intr_write(1);
   while (1) ; // should never return
