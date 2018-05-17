@@ -123,6 +123,7 @@ static void kmt_teardown(thread_t *thread){
 }
 static thread_t *kmt_schedule(){
     thread_t *next_thread = (thread_t *)pmm->alloc(sizeof(thread_t));
+    Log("current_thread->tid: %d", current_thread->tid);
     if (current_thread->next == NULL)
         next_thread = head;
     else
