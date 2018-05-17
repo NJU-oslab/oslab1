@@ -178,11 +178,11 @@ static void kmt_sem_init(sem_t *sem, const char *name, int value){
 
 static void kmt_sem_wait(sem_t *sem){
     kmt_spin_lock(&sem_lock);
-    Log("sem_count: 0x%x", sem->count);
+    Log("%s: sem_count: 0x%x",sem->name, sem->count);
     while (sem->count == 0){
         current_thread->runnable = 0;
         current_thread->waiting_sem = sem;
-        Log("sem: 0x%x", current_thread->waiting_sem);
+        Log("%s: 0x%x",current_thread->waiting_sem->name, current_thread->waiting_sem);
         kmt_spin_unlock(&sem_lock);
         //while (current_thread->runnable == 0);
         _yield();
