@@ -62,6 +62,7 @@ static void *pmm_alloc(size_t size) {
 		block->start = p;
 		block->free = 0;
 		block->next = NULL;
+		Log("ret: 0x%x", p);
 		return p;
 	}
 	else
@@ -83,6 +84,7 @@ static void *pmm_alloc(size_t size) {
 		p->start = q;
 		p->free = 0;
 		p->next = NULL;
+		Log("ret: 0x%x", p->start);
 		return p->start;
 	}
 }
