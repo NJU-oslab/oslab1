@@ -58,12 +58,12 @@ static void free_unsafe(void *ptr) {
 
 static size_t align(size_t size) {
     size_t k = 0;
-	mul = 1;
-	while (mul < size) {
-		mul <<= 1;
+	power = 1;
+	while (power < size) {
+		power <<= 1;
 		k++;
 	}
-	printf("size: %d\t mul: %d\n", size, mul);
+	printf("size: %d\t mul: %d\n", size, power);
 	return mul;
 }
 
@@ -102,10 +102,9 @@ static void* malloc_unsafe(size_t size) {
 			current->body.size -= size;
 			current = (Block *)((char *)current + current->body.size);
 			current->body.size = size;
-			while ((size_t)current % mul != 0) {
-				current->body.size -= 1;
-				current = (Block *)((char *)current + current->body.size);
-				current->body.size = size;
+			while ((size_t)current % power != 0) {
+				current = (Block *)((char *)current - 1;
+				current->body.size++;
 			}
 			freep = prev;
 			TRACE_EXIT;
