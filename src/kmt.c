@@ -196,6 +196,7 @@ static void kmt_sem_signal(sem_t *sem){
     sem->count++;
     while (cur != NULL){
         if (cur->runnable == 0 && cur->waiting_sem == sem){
+            Log("WAKE UP!");
             cur->runnable = 1;
             cur->waiting_sem = NULL;
             break;
