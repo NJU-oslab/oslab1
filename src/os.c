@@ -90,7 +90,6 @@ void sem_test() {
 
 static void os_run() {
   alloc_test();
-  Log("intr_status: %d", _intr_read());
   thread_test();
   sem_test();
   _intr_write(1);
@@ -99,7 +98,7 @@ static void os_run() {
 
 static _RegSet *os_interrupt(_Event ev, _RegSet *regs) {
   if (ev.event == _EVENT_IRQ_TIMER){
- //   Log("_EVENT_IRQ_TIMER");
+    Log("_EVENT_IRQ_TIMER");
     if (current_thread != NULL)
       current_thread->tf = regs;
     current_thread = kmt->schedule();
