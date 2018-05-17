@@ -37,7 +37,7 @@ static void free_unsafe(void *ptr) {
 		if (current >= current->body.next && (head > current || head < current->body.next))
 			break;
 		current = current->body.next;
-	}
+	}/*
 	//merge it and its prev
 	if ((char*)head + head->body.size == (char*)current->body.next){
 		head->body.size += current->body.next->body.size;
@@ -51,7 +51,7 @@ static void free_unsafe(void *ptr) {
 		current->body.next = head->body.next;
 	}
 	else
-		current->body.next = head;
+		current->body.next = head;*/
 	freep = current;
 	TRACE_EXIT;
 }
@@ -134,9 +134,9 @@ static void *pmm_alloc(size_t size){
 	kmt->spin_lock(&pmm_lock);
 	void *ret = malloc_unsafe(size);
 	Log("malloc's ret: 0x%x", ret);
-	kmt->spin_unlock(&pmm_lock);
 	Log("RET mod 2^k = %d", (size_t)ret %mul);
 	assert((size_t)ret % mul == 0);
+	kmt->spin_unlock(&pmm_lock);
 	TRACE_EXIT;
 	return ret;
 }
