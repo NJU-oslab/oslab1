@@ -41,7 +41,6 @@ void alloc_test() {
 }
 
 static thread_t test_thread[5];
-static int finished_thread[5];
 
 static void thread_test_func(void *tid){
     TRACE_ENTRY;
@@ -49,7 +48,6 @@ static void thread_test_func(void *tid){
     for (cnt = 0; cnt < 10; cnt++){
         Log("The %d thread prints: %d", (int)tid, cnt);
     }
-    finished_thread[(int)tid] = 1;
     Log("The %d thread is finished.", (int)tid);
     while (1);
 }
@@ -57,9 +55,6 @@ static void thread_test_func(void *tid){
 void thread_test() {
   Log("thread_test begin...");   
   int i;
-  for (i = 0; i < 5; i++){
-    finished_thread[i] = 0;
-  }
   for (i = 0; i < 5; i++){
     kmt->create(&test_thread[i], thread_test_func, (void *)i);
     Log("Thread %d created.", i);
@@ -69,7 +64,16 @@ void thread_test() {
   Log("thread_test end\n============================");
 }
 
+static sem_t empty;
+static sem_t fill;
 
+static void producer(void *arg) {
+
+}
+
+static void consumer(void *arg) {
+
+}
 
 void sem_test() {
   Log("sem_test begin");
