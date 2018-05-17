@@ -122,7 +122,7 @@ static void kmt_teardown(thread_t *thread){
     kmt_spin_unlock(&thread_lock);
 }
 static thread_t *kmt_schedule(){
-    thread_t *next_thread = (thread_t *)pmm->alloc(sizeof(thread_t));
+    thread_t *next_thread = current_thread;
     if (current_thread != NULL)
         Log("current_thread->tid: %d", current_thread->tid);
     if (current_thread->next == NULL)
