@@ -66,18 +66,30 @@ void thread_test() {
 
 static sem_t empty;
 static sem_t fill;
+static thread_t sem_test_thread[2];
 
 static void producer(void *arg) {
-
+  while (1){
+    kmt->sem_wait(&empty);
+    printf("(");
+    kmt->sem_signal(&fill);
+  }
 }
 
 static void consumer(void *arg) {
-
+  while (1){
+    kmt->sem_wait(&fill);
+    printf(")");
+    kmt->sem_signal(&empty);
+  }
 }
 
 void sem_test() {
   Log("sem_test begin");
-
+  kmt->sem_init(&empty, "empty", 20);
+  kmt->sem_init(&fill, "fill", 0);
+  kmt->create(&sem_test_thread[0], producer, NULL);
+  kmt->create(&sem_test_thread[1], consumer, NULL);
   Log("sem_test end\n============================");
 }
 
