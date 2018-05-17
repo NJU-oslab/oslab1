@@ -64,6 +64,7 @@ void thread_test() {
         if (finished_thread[j] == 1)
             cnt++;
     }
+    Log("cnt: %d", cnt);
     if (cnt == 5)
         break;
   }

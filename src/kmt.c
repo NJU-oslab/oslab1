@@ -50,6 +50,7 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     new_thread->stack.end = new_thread->stack.start + MAX_STACK_SIZE;
     new_thread->tf = _make(new_thread->stack, entry, arg);
     new_thread->runnable = 1;
+    new_thread->waiting_sem = NULL;
     new_thread->tid = thread_cnt++;
     if (head == NULL){
         new_thread->next = NULL;
