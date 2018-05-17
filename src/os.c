@@ -21,7 +21,9 @@ static void os_init() {
 
 void alloc_test() {
   Log("alloc_test begin...");
+  Log("intr_status: %d", _intr_read());
   int *arr = (int*)pmm->alloc(20 * sizeof(int));
+  Log("intr_status: %d", _intr_read());
   for (int i = 0; i < 20; i++){
     arr[i] = i;
   }
@@ -29,9 +31,11 @@ void alloc_test() {
     Log("arr[%d]: %d", i, arr[i]);
   }
   pmm->free(arr);
+  Log("intr_status: %d", _intr_read());
   pmm->alloc(16);
   pmm->alloc(20);
   pmm->alloc(24);
+  Log("intr_status: %d", _intr_read());
   Log("_heap.end: 0x%x", _heap.end);
   Log("alloc_test end.\n============================");
 }
