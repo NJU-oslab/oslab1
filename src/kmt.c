@@ -196,6 +196,7 @@ static void kmt_sem_signal(sem_t *sem){
     kmt_spin_lock(&sem_lock);
     thread_t *cur = head;
     sem->count++;
+    Log("%s: sem_count: 0x%x",sem->name, sem->count);
     while (cur != NULL){
         Log("sem: 0x%x", cur->waiting_sem);
         if (cur->runnable == 0 && cur->waiting_sem == sem){
