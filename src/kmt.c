@@ -136,9 +136,9 @@ static thread_t *kmt_schedule(){
         next_thread = head;
     else
         next_thread = current_thread->next;
-    printf("next_thread: 0x%x\n %d\n", next_thread, next_thread->runnable);
+//    printf("next_thread: 0x%x\n %d\n", next_thread, next_thread->runnable);
     while (1){
-//        printf("next_thread: 0x%x\n", next_thread);
+        printf("next_thread: 0x%x %d\n", next_thread,next_thread->runnable);
         if (next_thread != NULL && next_thread->runnable == 1)
             break;
         if (current_thread->next != NULL)
