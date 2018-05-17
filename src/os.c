@@ -40,6 +40,7 @@ static thread_t test_thread[5];
 static int finished_thread[5];
 
 void thread_test_func(void *tid){
+    TRACE_ENTRY;
     int cnt;
     for (cnt = 0; cnt < 10; cnt++){
         Log("The %d thread prints: %d", (int)tid, cnt);
@@ -64,7 +65,7 @@ void thread_test() {
         if (finished_thread[j] == 1)
             cnt++;
     }
-    Log("cnt: %d", cnt);
+//    Log("cnt: %d", cnt);
     if (cnt == 5)
         break;
   }
