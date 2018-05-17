@@ -59,6 +59,7 @@ static Block* allocate_new(size_t size) {
 	TRACE_ENTRY;
 	void *new_mem;
 	Block *new_block;
+
 	if (size + cur > _heap.end)
 		return NULL;
 	else {
@@ -73,14 +74,9 @@ static Block* allocate_new(size_t size) {
 	return freep;
 }
 
-static size_t auto_align(size_t size) {
-	return ((size + sizeof(Block) - 1) / sizeof(Block)) * sizeof(Block) + sizeof(Block);
-}
-
 static void* malloc_unsafe(size_t size) {
 	TRACE_ENTRY;
 	Block *current, *prev;
-	size = auto_align(size);
 	prev = freep;
 	if (prev == NULL) {
 		freep = prev = &base;
