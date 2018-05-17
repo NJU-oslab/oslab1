@@ -122,7 +122,6 @@ static void kmt_teardown(thread_t *thread){
     kmt_spin_unlock(&thread_lock);
 }
 static thread_t *kmt_schedule(){
-    TRACE_ENTRY;
     thread_t *next_thread = head;
     if (current_thread != NULL)
         Log("current_thread->tid: %d", current_thread->tid);
@@ -130,6 +129,7 @@ static thread_t *kmt_schedule(){
         next_thread = head;
     else
         next_thread = current_thread->next;
+    TRACE_ENTRY;
     while (1){
         if (next_thread != NULL && next_thread->runnable == 1)
             break;
