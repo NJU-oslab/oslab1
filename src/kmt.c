@@ -60,7 +60,7 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     thread->waiting_sem = NULL;
     thread->tid = thread_cnt++;
     thread->tf = _make(thread->stack, entry, arg);
-    Log("entry: %d\targ: %d", entry, arg);
+    Log("entry: %d\targ: 0x%x", entry, arg);
     kmt_spin_unlock(&thread_lock);
     TRACE_EXIT;
     return 0;
