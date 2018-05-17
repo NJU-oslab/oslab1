@@ -55,11 +55,20 @@ static void free_unsafe(void *ptr) {
 	TRACE_EXIT;
 }
 
+static size_t align(size_t size) {
+    int k = 0, mul = 1;
+	while (mul < size) {
+		mul <<= 1;
+		k++;
+	}
+	size = mul;
+}
+
 static Block* allocate_new(size_t size) {
 	TRACE_ENTRY;
 	void *new_mem;
 	Block *new_block;
-
+	size = align(size);
 	if (size + cur > _heap.end)
 		return NULL;
 	else {
@@ -73,7 +82,7 @@ static Block* allocate_new(size_t size) {
 	TRACE_EXIT;
 	return freep;
 }
-
+i
 static void* malloc_unsafe(size_t size) {
 	TRACE_ENTRY;
 	Block *current, *prev;
