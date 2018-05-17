@@ -10,10 +10,10 @@
 
 #define TRACEME
 #ifdef TRACEME
-  #define TRACE_ENTRY \
-    printf("\033[34m[trace]\033[0m %s:entry\n", __func__)
-  #define TRACE_EXIT \
-    printf("\033[34m[trace]\033[0m %s:exit\n", __func__)
+  #define TRACE_ENTRY/* \
+    printf("\033[34m[trace]\033[0m %s:entry\n", __func__)*/
+  #define TRACE_EXIT/* \
+    printf("\033[34m[trace]\033[0m %s:exit\n", __func__)*/
 #else
   #define TRACE_ENTRY ((void)0)
   #define TRACE_EXIT ((void)0)
