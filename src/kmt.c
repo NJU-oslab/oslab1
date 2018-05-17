@@ -14,7 +14,7 @@ static void kmt_sem_signal(sem_t *sem);
 
 static int spin_cnt = 0;
 static int intr_ready = 0;
-static thread_t *current_thread = NULL;
+static volatile thread_t *current_thread = NULL;
 static thread_t *head = NULL;
 static int thread_cnt = 0;
 static spinlock_t thread_lock;
