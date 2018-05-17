@@ -122,6 +122,11 @@ static void kmt_teardown(thread_t *thread){
     kmt_spin_unlock(&thread_lock);
 }
 static thread_t *kmt_schedule(){
+    thread_t * cnm = head;
+    while (cnm != NULL){
+        printf("0x%x\t %d\n", current_thread, current_thread->runnable);
+        cnm = cnm->next;
+    }
     if (current_thread == NULL)
         current_thread = head;
     thread_t *next_thread = current_thread;
