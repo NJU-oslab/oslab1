@@ -8,6 +8,7 @@ static void pmm_free(void *ptr);
 
 static spinlock_t pmm_lock;
 static void *cur = NULL;
+static size_t mul = 1;
 
 MOD_DEF(pmm) {
     .init = pmm_init,
@@ -56,7 +57,8 @@ static void free_unsafe(void *ptr) {
 }
 
 static size_t align(size_t size) {
-    size_t k = 0, mul = 1;
+    size_t k = 0;
+	mul = 1;
 	while (mul < size) {
 		mul <<= 1;
 		k++;
@@ -132,6 +134,7 @@ static void *pmm_alloc(size_t size){
 	void *ret = malloc_unsafe(size);
 	Log("malloc's ret: 0x%x", ret);
 	kmt->spin_unlock(&pmm_lock);
+	assert((size_t)ret % mul == 0);
 	TRACE_EXIT;
 	return ret;
 }
