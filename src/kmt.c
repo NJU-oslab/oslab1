@@ -43,7 +43,7 @@ static void kmt_init(){
 static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     TRACE_ENTRY;
     kmt_spin_lock(&thread_lock);
-    thread_t *new_thread = NULL;
+    thread_t *new_thread = (thread_t *)pmm->alloc(sizeof(thread_t));
     Log("Allocate begins.");
     new_thread->stack.start = pmm->alloc(MAX_STACK_SIZE);
     Log("The thread has been allocated memory.");
