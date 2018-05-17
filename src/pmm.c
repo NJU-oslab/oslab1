@@ -63,7 +63,7 @@ static size_t align(size_t size) {
 		mul <<= 1;
 		k++;
 	}
-	printf("size: %d\t mul: %d\n", size, mul);
+//	printf("size: %d\t mul: %d\n", size, mul);
 	return mul;
 }
 
