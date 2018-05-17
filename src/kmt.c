@@ -181,6 +181,7 @@ static void kmt_sem_wait(sem_t *sem){
     while (sem->count == 0){
         current_thread->runnable = 0;
         current_thread->waiting_sem = sem;
+        Log("sem: 0x%x", current_thread->waiting_sem);
         kmt_spin_unlock(&sem_lock);
         //while (current_thread->runnable == 0);
         _yield();
