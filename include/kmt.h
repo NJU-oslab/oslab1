@@ -14,7 +14,7 @@ struct semaphore{
 };
 
 typedef struct thread{
-    int runnable;
+    volatile int runnable;
     int tid;
     _RegSet *tf;
     _Area stack;
