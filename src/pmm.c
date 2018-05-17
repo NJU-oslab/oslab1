@@ -99,10 +99,11 @@ static void* malloc_unsafe(size_t size) {
 	current = prev->body.next;
 	while (1) {
 		if (current->body.size >= size) {
-			if (current->body.size > size) {
+			if (current->body.size > size) {/*
 				current->body.size -= size;
 				current = (Block *)((char *)current + current->body.size);
-				current->body.size = size;
+				current->body.size = size;*/
+				return (void *)current;
 		//		size = current->body.size;
 		//		prev->body.next = current->body.next;
 		//		freep = prev;
@@ -134,7 +135,7 @@ static void *pmm_alloc(size_t size){
 	kmt->spin_lock(&pmm_lock);
 	void *ret = malloc_unsafe(size);
 	Log("malloc's ret: 0x%x", ret);
-	Log("RET mod 2^k = %d", (size_t)ret %mul);
+	Log("RET mod 2^k = %d", (size_t)ret % mul);
 //	assert((size_t)ret % mul == 0);
 	kmt->spin_unlock(&pmm_lock);
 	TRACE_EXIT;
