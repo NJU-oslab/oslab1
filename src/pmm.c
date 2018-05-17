@@ -71,7 +71,7 @@ static Block* allocate_new(size_t size) {
 	TRACE_ENTRY;
 	void *new_mem;
 	Block *new_block;
-	printf("size: %d\n", size);
+	printf("size: 0x%x\n", size);
 	if (2 * size + cur > _heap.end)
 		return NULL;
 	else {
