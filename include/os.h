@@ -6,7 +6,6 @@
 #include "libc.h"
 #include "kmt.h"
 #include "pmm.h"
-#include "test.h"
 
 static inline void puts(const char *p) {
   for (; *p; p++) {
