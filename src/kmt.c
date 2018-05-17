@@ -132,6 +132,7 @@ static thread_t *kmt_schedule(){
     else
         next_thread = current_thread->next;
     while (1){
+        printf("next_thread: 0x%x", next_thread);
         if (next_thread != NULL && next_thread->runnable == 1)
             break;
         if (current_thread->next != NULL)
@@ -186,7 +187,7 @@ static void kmt_sem_wait(sem_t *sem){
         kmt_spin_unlock(&sem_lock);
         //while (current_thread->runnable == 0);
         _yield();
-        printf("Come back\n");
+//        printf("Come back\n");
         kmt_spin_lock(&sem_lock);
     }
     sem->count --;
