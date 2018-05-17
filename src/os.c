@@ -63,7 +63,7 @@ void thread_test() {
   for (i = 0; i < 5; i++){
     kmt->create(&test_thread[i], thread_test_func, (void *)i);
     Log("Thread %d created.", i);
-  }/*
+  }
   while (1){
     int j;
     int cnt = 0;
@@ -78,7 +78,7 @@ void thread_test() {
   Log("All the thread has finished.");
   for (i = 0; i < 5; i++)
     kmt->teardown(&test_thread[i]);
-  Log("All the thread has been teardowned.");*/
+  Log("All the thread has been teardowned.");
   Log("thread_test end\n============================");
 }
 
