@@ -178,8 +178,8 @@ static void kmt_sem_init(sem_t *sem, const char *name, int value){
 }
 
 static void kmt_sem_wait(sem_t *sem){
-    if (strcmp(current_thread->name, "consumer") == 0)
-        printf("consumer!\n");
+//    if (strcmp(current_thread->name, "consumer") == 0)
+//        printf("consumer!\n");
     kmt_spin_lock(&sem_lock);
     Log("%s: sem_count: 0x%x",sem->name, sem->count);
     while (sem->count == 0){
