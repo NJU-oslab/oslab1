@@ -61,8 +61,8 @@ static size_t align(size_t size) {
 		mul <<= 1;
 		k++;
 	}
-	size = mul;
-	return size;
+	printf("size: %d\t mul: %d\n");
+	return mul;
 }
 
 static Block* allocate_new(size_t size) {
