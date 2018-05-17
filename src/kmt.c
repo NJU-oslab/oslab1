@@ -44,14 +44,6 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     TRACE_ENTRY;
     kmt_spin_lock(&thread_lock);
     thread_t *new_thread = thread;
-    Log("Allocate begins.");
-    new_thread->stack.start = pmm->alloc(MAX_STACK_SIZE);
-    Log("The thread has been allocated memory.");
-    new_thread->stack.end = new_thread->stack.start + MAX_STACK_SIZE;
-    new_thread->tf = _make(new_thread->stack, entry, arg);
-    new_thread->runnable = 1;
-    new_thread->waiting_sem = NULL;
-    new_thread->tid = thread_cnt++;
     if (head == NULL){
         new_thread->next = NULL;
         head = new_thread;
@@ -60,6 +52,14 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
         new_thread->next = head;
         head = new_thread;
     }
+    Log("Allocate begins.");
+    thread->stack.start = pmm->alloc(MAX_STACK_SIZE);
+    Log("The thread has been allocated memory.");
+    thread->stack.end = thread->stack.start + MAX_STACK_SIZE;
+    thread->tf = _make(thread->stack, entry, arg);
+    thread->runnable = 1;
+    thread->waiting_sem = NULL;
+    thread->tid = thread_cnt++;
     kmt_spin_unlock(&thread_lock);
     TRACE_EXIT;
     return 0;
