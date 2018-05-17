@@ -14,7 +14,7 @@ static void kmt_sem_signal(sem_t *sem);
 
 static int spin_cnt = 0;
 static int intr_ready = 0;
-volatile static thread_t *current_thread = NULL;
+static thread_t *current_thread = NULL;
 static thread_t *head = NULL;
 static int thread_cnt = 0;
 static spinlock_t thread_lock;
@@ -208,7 +208,7 @@ static void kmt_sem_signal(sem_t *sem){
     while (cur != NULL){
         Log("sem: 0x%x", cur->waiting_sem);
         if (cur->runnable == 0 && cur->waiting_sem == sem){
-            printf("%s: 0x%x\n",cur->waiting_sem->name, cur->waiting_sem);
+            printf("%s: 0x%x 0x%x\n ",cur->waiting_sem->name, cur->waiting_sem,cur);
             cur->runnable = 1;
             cur->waiting_sem = NULL;
             break;
