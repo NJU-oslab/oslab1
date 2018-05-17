@@ -45,7 +45,7 @@ static void thread_test_func(void *tid){
         Log("The %d thread prints: %d", (int)tid, cnt);
     }
     finished_thread[(int)tid] = 1;
-    Log("The %d thread is finished.");
+    Log("The %d thread is finished.", (int)tid);
 
 }
 
