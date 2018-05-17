@@ -108,10 +108,10 @@ static void kmt_teardown(thread_t *thread){
     /* print threads' information*/
     Log("------------------------------------------");
     Log("Now, the thread information is as follows.");
-    thread_t *cur = head;
-    while (cur != NULL){
-        Log("thread %d: runnbale: %d", cur->tid, cur->runnable);
-        cur = cur->next;
+    thread_t *curr = head;
+    while (curr != NULL){
+        Log("thread %d: runnbale: %d", curr->tid, curr->runnable);
+        curr = curr->next;
     }
     Log("------------------------------------------");
 
