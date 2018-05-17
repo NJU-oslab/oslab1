@@ -189,6 +189,7 @@ static void kmt_sem_wait(sem_t *sem){
         kmt_spin_lock(&sem_lock);
     }
     sem->count --;
+    printf("Out of wait\n");
     kmt_spin_unlock(&sem_lock);
 }
 
