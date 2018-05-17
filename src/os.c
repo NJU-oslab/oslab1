@@ -43,7 +43,7 @@ void alloc_test() {
 static thread_t test_thread[5];
 static int finished_thread[5];
 
-void thread_test_func(void *tid){
+static void thread_test_func(void *tid){
     TRACE_ENTRY;
     int cnt;
     for (cnt = 0; cnt < 10; cnt++){
@@ -68,6 +68,8 @@ void thread_test() {
   Log("Thread 2 has been teardowned.");
   Log("thread_test end\n============================");
 }
+
+
 
 void sem_test() {
   Log("sem_test begin");
