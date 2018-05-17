@@ -152,9 +152,9 @@ static void kmt_spin_lock(spinlock_t *lk){
     _intr_write(0);
     if (lk->locked == 0){
         lk->locked = 1;
-        spin_cnt ++;
         if (spin_cnt == 0)
             intr_ready = intr_status;
+        spin_cnt ++;
     }
     else{
         Log("The spinlock has been locked!");
