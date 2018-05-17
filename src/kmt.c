@@ -199,7 +199,7 @@ static void kmt_sem_signal(sem_t *sem){
     while (cur != NULL){
         Log("sem: 0x%x", cur->waiting_sem);
         if (cur->runnable == 0 && cur->waiting_sem == sem){
-            Log("WAKE UP!");
+            Log("%s: 0x%x",cur->waiting_sem->name, cur->waiting_sem);
             cur->runnable = 1;
             cur->waiting_sem = NULL;
             break;
