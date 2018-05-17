@@ -77,6 +77,7 @@ static void producer(void *arg) {
 }
 
 static void consumer(void *arg) {
+  printf("Hello world from consumer");
   while (1){
     kmt->sem_wait(&fill);
     printf(")");
