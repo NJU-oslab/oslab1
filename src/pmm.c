@@ -55,7 +55,7 @@ static void free_unsafe(void *ptr) {
 	freep = current;
 	TRACE_EXIT;
 }
-
+/*
 static size_t align(size_t size) {
     size_t k = 0;
 	mul = 1;
@@ -65,7 +65,7 @@ static size_t align(size_t size) {
 	}
 //	printf("size: %d\t mul: %d\n", size, mul);
 	return mul;
-}
+}*/
 
 static Block* allocate_new(size_t size) {
 	TRACE_ENTRY;
