@@ -64,7 +64,7 @@ static size_t align(size_t size) {
 		k++;
 	}
 	printf("size: %d\t mul: %d\n", size, power);
-	return mul;
+	return power;
 }
 
 static Block* allocate_new(size_t size) {
