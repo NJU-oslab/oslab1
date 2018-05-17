@@ -182,7 +182,8 @@ static void kmt_sem_wait(sem_t *sem){
         current_thread->runnable = 0;
         current_thread->waiting_sem = sem;
         kmt_spin_unlock(&sem_lock);
-        while (current_thread->runnable == 0);
+        //while (current_thread->runnable == 0);
+        _yield();
         kmt_spin_lock(&sem_lock);
     }
     sem->count --;
