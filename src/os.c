@@ -94,7 +94,8 @@ void sem_test() {
   kmt->sem_init(&fill, "fill", 0);
   kmt->create(&sem_test_thread[0], producer, NULL);
   kmt->create(&sem_test_thread[1], consumer, NULL);
-  printf("sem_test end\n============================");
+  Log("sem_test end.");
+//  printf("sem_test end\n============================");
 }
 
 static void os_run() {
@@ -110,9 +111,9 @@ static _RegSet *os_interrupt(_Event ev, _RegSet *regs) {
 //    Log("_EVENT_IRQ_TIMER");
     if (current_thread != NULL)
       current_thread->tf = regs;
-    printf("Event\n");
+//    printf("Event\n");
     current_thread = kmt->schedule();
-    printf("%x\n",current_thread);
+//    printf("%x\n",current_thread);
     return current_thread->tf;
   } 
   if (ev.event == _EVENT_IRQ_IODEV) Log("_EVENT_IRQ_IODEV");

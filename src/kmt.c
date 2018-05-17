@@ -124,7 +124,7 @@ static void kmt_teardown(thread_t *thread){
 static thread_t *kmt_schedule(){
     thread_t * cnm = head;
     while (cnm != NULL){
-        printf("0x%x\t %d\n", cnm, cnm->runnable);
+//        printf("0x%x\t %d\n", cnm, cnm->runnable);
         cnm = cnm->next;
     }
     if (current_thread == NULL)
@@ -138,7 +138,7 @@ static thread_t *kmt_schedule(){
         next_thread = current_thread->next;
 //    printf("next_thread: 0x%x\n %d\n", next_thread, next_thread->runnable);
     while (1){
-        printf("next_thread: 0x%x %d\n", next_thread,next_thread->runnable);
+//        printf("next_thread: 0x%x %d\n", next_thread,next_thread->runnable);
         if (next_thread != NULL && next_thread->runnable == 1)
             break;
         if (next_thread->next != NULL)
@@ -147,7 +147,7 @@ static thread_t *kmt_schedule(){
             next_thread = head;
     }
     current_thread = next_thread;
-    printf("Sc over\n");
+//    printf("Sc over\n");
     return next_thread;
 }
 static void kmt_spin_init(spinlock_t *lk, const char *name){
@@ -195,13 +195,7 @@ static void kmt_sem_wait(sem_t *sem){
         Log("%s: 0x%x",current_thread->waiting_sem->name, current_thread->waiting_sem);
         kmt_spin_unlock(&sem_lock);
        // printf("lock name: %s\n", sem_lock.name);
-        while (current_thread->runnable == 0){
-            kmt_spin_lock(&sem_lock);
-            printf("current t: %x\n",current_thread);
-            kmt_spin_unlock(&sem_lock);
-            //_putc('f');
-        };
-        _putc('o');
+        while (current_thread->runnable == 0);
         //_yield();
 //        printf("Come back\n");
         kmt_spin_lock(&sem_lock);
@@ -219,7 +213,7 @@ static void kmt_sem_signal(sem_t *sem){
     while (cur != NULL){
         Log("sem: 0x%x", cur->waiting_sem);
         if (cur->runnable == 0 && cur->waiting_sem == sem){
-            printf("%s: 0x%x 0x%x\n ",cur->waiting_sem->name, cur->waiting_sem,cur);
+//            printf("%s: 0x%x 0x%x\n ",cur->waiting_sem->name, cur->waiting_sem,cur);
             cur->runnable = 1;
             cur->waiting_sem = NULL;
             break;
