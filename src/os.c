@@ -65,7 +65,7 @@ void thread_test() {
     Log("Thread %d created.", i);
   }
   kmt->teardown(&test_thread[2]);
-  Log("Thread 2 has been teardowned.");*/
+  Log("Thread 2 has been teardowned.");
   Log("thread_test end\n============================");
 }
 
