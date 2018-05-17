@@ -113,7 +113,7 @@ static void* malloc_unsafe(size_t size) {
 				freep = prev;
 			}
 			TRACE_EXIT;
-			return (void *)(current + 1);
+			return (void *)(current);
 		}
 		if (current == freep && (current = allocate_new(size)) == NULL){
 			TRACE_EXIT;
