@@ -194,6 +194,7 @@ static void kmt_sem_wait(sem_t *sem){
             kmt_spin_unlock(&sem_lock);
             //_putc('f');
         };
+        _putc('o');
         //_yield();
 //        printf("Come back\n");
         kmt_spin_lock(&sem_lock);
