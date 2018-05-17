@@ -165,8 +165,8 @@ static void kmt_spin_unlock(spinlock_t *lk){
     if (lk->locked == 1){
         lk->locked = 0;
         spin_cnt --;
-        if (spin_cnt == 0)
-            _intr_write(intr_ready);
+        if (spin_cnt == 0 && intr_ready == 1)
+            _intr_write(1);
     }
     else{
         Log("The spinlock has been unlocked!");
@@ -187,8 +187,8 @@ static void kmt_sem_wait(sem_t *sem){
         Log("%s: 0x%x",current_thread->waiting_sem->name, current_thread->waiting_sem);
         kmt_spin_unlock(&sem_lock);
         while (current_thread->runnable == 0){
-			kmt_spin_lock(&sem_lock);
-			kmt_spin_unlock(&sem_lock);
+/*			kmt_spin_lock(&sem_lock);
+			kmt_spin_unlock(&sem_lock);*/
 		}
         kmt_spin_lock(&sem_lock);
     }
