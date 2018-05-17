@@ -190,8 +190,8 @@ static void kmt_sem_wait(sem_t *sem){
 }
 
 static void kmt_sem_signal(sem_t *sem){
-    thread_t *cur = head;
     kmt_spin_lock(&sem_lock);
+    thread_t *cur = head;
     sem->count++;
     while (cur != NULL){
         if (cur->runnable == 0 && cur->waiting_sem == sem){
