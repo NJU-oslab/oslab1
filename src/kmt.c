@@ -142,7 +142,7 @@ static thread_t *kmt_schedule(){
         if (next_thread != NULL && next_thread->runnable == 1)
             break;
         if (current_thread->next != NULL)
-            next_thread = current_thread->next;
+            next_thread = next_thread->next;
         else
             next_thread = head;
     }
