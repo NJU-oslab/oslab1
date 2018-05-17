@@ -37,7 +37,7 @@ static void free_unsafe(void *ptr) {
 		if (current >= current->body.next && (head > current || head < current->body.next))
 			break;
 		current = current->body.next;
-	}/*
+	}
 	//merge it and its prev
 	if ((char*)head + head->body.size == (char*)current->body.next){
 		head->body.size += current->body.next->body.size;
@@ -51,7 +51,7 @@ static void free_unsafe(void *ptr) {
 		current->body.next = head->body.next;
 	}
 	else
-		current->body.next = head;*/
+		current->body.next = head;
 	freep = current;
 	TRACE_EXIT;
 }
