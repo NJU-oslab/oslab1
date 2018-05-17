@@ -83,7 +83,7 @@ static Block* allocate_new(size_t size) {
 	TRACE_EXIT;
 	return freep;
 }
-i
+
 static void* malloc_unsafe(size_t size) {
 	TRACE_ENTRY;
 	Block *current, *prev;
