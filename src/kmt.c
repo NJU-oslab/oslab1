@@ -207,5 +207,6 @@ static void kmt_sem_signal(sem_t *sem){
         }
         cur = cur->next;
     }
+    printf("Out of signal");
     kmt_spin_unlock(&sem_lock);
 }
