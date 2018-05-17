@@ -8,7 +8,7 @@ static void pmm_free(void *ptr);
 
 static spinlock_t pmm_lock;
 static void *cur = NULL;
-static size_t mul = 1;
+static size_t power = 1;
 
 MOD_DEF(pmm) {
     .init = pmm_init,
