@@ -39,10 +39,8 @@ static thread_t test_thread[5];
 static void thread_test_func(void *tid){
     TRACE_ENTRY;
     int cnt;
-    while (1){
-      for (cnt = 0; cnt < 10; cnt++){
+    for (cnt = 0; cnt < 10; cnt++){
         Log("The %d thread prints: %d", (int)tid, cnt);
-      }
     }
     Log("The %d thread is finished.", (int)tid);
     while (1);
