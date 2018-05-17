@@ -64,7 +64,6 @@ static size_t align(size_t size) {
 		k++;
 	}
 	printf("size: %d\t mul: %d\n", size, mul);
-	assert((size_t)(cur + mul) % mul == 0);
 	return mul;
 }
 
