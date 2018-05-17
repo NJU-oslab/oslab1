@@ -21,21 +21,18 @@ static void os_init() {
 }
 
 static void os_run() {
-//  alloc_test();
+  alloc_test();
 //  thread_test();
-  sem_test();
+//  sem_test();
   _intr_write(1);
   while (1) ; // should never return
 }
 
 static _RegSet *os_interrupt(_Event ev, _RegSet *regs) {
   if (ev.event == _EVENT_IRQ_TIMER || ev.event == _EVENT_YIELD){
-//    Log("_EVENT_IRQ_TIMER");
     if (current_thread != NULL)
       current_thread->tf = regs;
-//    printf("Event\n");
     current_thread = kmt->schedule();
-//    printf("%x\n",current_thread);
     return current_thread->tf;
   } 
   if (ev.event == _EVENT_IRQ_IODEV) Log("_EVENT_IRQ_IODEV");
