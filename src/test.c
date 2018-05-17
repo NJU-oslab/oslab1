@@ -55,6 +55,8 @@ void thread_test() {
   }
   kmt->teardown(&test_thread[2]);
   Log("Thread 2 has been teardowned.");
+  kmt->teardown(&test_thread[4]);
+  Log("THread 4 has been teardowned.");
   Log("thread_test end\n============================");
 }
 
