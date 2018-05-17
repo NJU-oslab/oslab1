@@ -72,8 +72,7 @@ static Block* allocate_new(size_t size) {
 	void *new_mem;
 	Block *new_block;
 	printf("size: %d\n", size);
-	size = align(size);
-	if (size + cur > _heap.end)
+	if (2 * size + cur > _heap.end)
 		return NULL;
 	else {
 		new_mem = cur;
@@ -91,6 +90,7 @@ static void* malloc_unsafe(size_t size) {
 	TRACE_ENTRY;
 	Block *current, *prev;
 	prev = freep;
+	size = align(size);
 	if (prev == NULL) {
 		freep = prev = &base;
 		base.body.next = freep;
