@@ -56,10 +56,10 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     thread->stack.start = pmm->alloc(MAX_STACK_SIZE);
     Log("The thread has been allocated memory.");
     thread->stack.end = thread->stack.start + MAX_STACK_SIZE;
-    thread->tf = _make(thread->stack, entry, arg);
     thread->runnable = 1;
     thread->waiting_sem = NULL;
     thread->tid = thread_cnt++;
+    thread->tf = _make(thread->stack, entry, arg);
     kmt_spin_unlock(&thread_lock);
     TRACE_EXIT;
     return 0;
