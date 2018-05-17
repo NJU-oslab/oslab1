@@ -91,7 +91,6 @@ void sem_test() {
 static void os_run() {
   alloc_test();
   Log("intr_status: %d", _intr_read());
-  _intr_write(1);
   thread_test();
   _intr_write(1);
   sem_test();
