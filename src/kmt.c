@@ -164,8 +164,8 @@ static void kmt_spin_unlock(spinlock_t *lk){
     if (lk->locked == 1){
         lk->locked = 0;
         spin_cnt --;
-        if (spin_cnt == 0 && intr_ready == 1)
-            _intr_write(1);
+        if (spin_cnt == 0)
+            _intr_write(intr_ready);
     }
     else{
         Log("The spinlock has been unlocked!");
