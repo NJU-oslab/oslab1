@@ -39,7 +39,7 @@ void alloc_test() {
 static thread_t test_thread[5];
 static int finished_thread[5];
 
-static void thread_test_func(void *tid){
+void thread_test_func(void *tid){
     int cnt;
     for (cnt = 0; cnt < 10; cnt++){
         Log("The %d thread prints: %d", (int)tid, cnt);
