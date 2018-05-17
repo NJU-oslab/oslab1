@@ -86,7 +86,7 @@ static void consumer(void *arg) {
 
 void sem_test() {
   Log("sem_test begin");
-  kmt->sem_init(&empty, "empty", 100);
+  kmt->sem_init(&empty, "empty", 1);
   kmt->sem_init(&fill, "fill", 0);
   kmt->create(&sem_test_thread[0], producer, NULL);
   kmt->create(&sem_test_thread[1], consumer, NULL);
@@ -95,8 +95,8 @@ void sem_test() {
 
 static void os_run() {
 //  alloc_test();
-  thread_test();
-//  sem_test();
+//  thread_test();
+  sem_test();
   _intr_write(1);
   while (1) ; // should never return
 }
