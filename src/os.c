@@ -91,7 +91,7 @@ void sem_test() {
   kmt->sem_init(&fill, "fill", 0);
   kmt->create(&sem_test_thread[0], producer, NULL);
   kmt->create(&sem_test_thread[1], consumer, NULL);
-  Log("sem_test end\n============================");
+  printf("sem_test end\n============================");
 }
 
 static void os_run() {
