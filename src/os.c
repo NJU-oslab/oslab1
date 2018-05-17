@@ -64,24 +64,24 @@ void thread_test() {
   Log("thread_test end\n============================");
 }
 
-static sem_t empty;
-static sem_t fill;
+//static sem_t empty;
+//static sem_t fill;
 static thread_t sem_test_thread[2];
 
 static void producer(void *arg) {
   while (1){
-    kmt->sem_wait(&empty);
+    //kmt->sem_wait(&empty);
     printf("(");
-    kmt->sem_signal(&fill);
+    //kmt->sem_signal(&fill);
   }
 }
 
 static void consumer(void *arg) {
   printf("Hello world from consumer");
   while (1){
-    kmt->sem_wait(&fill);
+    //kmt->sem_wait(&fill);
     printf(")");
-    kmt->sem_signal(&empty);
+    //kmt->sem_signal(&empty);
   }
 }
 
