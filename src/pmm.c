@@ -72,15 +72,15 @@ static Block* allocate_new(size_t size) {
 	void *new_mem;
 	Block *new_block;
 	printf("size: 0x%x\n", size);
-	if (size + cur > _heap.end)
+	if (2 * size + cur > _heap.end)
 		return NULL;
 	else {
 		new_mem = cur;
-		cur += size;
+		cur += 2 * size;
 	}
 	Log("new_mem: 0x%x", new_mem);
 	new_block = (Block *)new_mem;
-	new_block->body.size = size;
+	new_block->body.size = 2 * size;
 	free_unsafe((void*)(new_block + 1));
 	TRACE_EXIT;
 	return freep;
