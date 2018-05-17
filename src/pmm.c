@@ -54,23 +54,23 @@ static void free_unsafe(void *ptr) {
 	freep = current;
 	TRACE_EXIT;
 }
-/*
+
 static size_t align(size_t size) {
-    int k = 0, mul = 1;
+    size_t k = 0, mul = 1;
 	while (mul < size) {
 		mul <<= 1;
 		k++;
 	}
-	printf("size: %d\t mul: %d\n");
+	printf("size: %d\t mul: %d\n", size, mul);
 	return mul;
-}*/
+}
 
 static Block* allocate_new(size_t size) {
 	TRACE_ENTRY;
 	void *new_mem;
 	Block *new_block;
 	printf("size: %d\n", size);
-//	size = align(size);
+	size = align(size);
 	if (size + cur > _heap.end)
 		return NULL;
 	else {
