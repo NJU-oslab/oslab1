@@ -99,14 +99,14 @@ static void* malloc_unsafe(size_t size) {
 	current = prev->body.next;
 	while (1) {
 		if (current->body.size >= size) {
-			if (current->body.size > size) {
+//			if (current->body.size > size) {
 				current->body.size -= size;
 				current = (Block *)((char *)current + current->body.size);
 				current->body.size = size;
-			}
-			else {
-				prev->body.next = current->body.next;
-			}
+//			}
+//			else {
+//				prev->body.next = current->body.next;
+//			}
 			freep = prev;
 			TRACE_EXIT;
 			return (void *)(current);
