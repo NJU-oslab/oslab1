@@ -189,7 +189,7 @@ static void kmt_sem_wait(sem_t *sem){
 //        while (current_thread->runnable == 0){
 /*			kmt_spin_lock(&sem_lock);
 			kmt_spin_unlock(&sem_lock);*/
-		}
+//		}
 		_yield();
         kmt_spin_lock(&sem_lock);
     }
