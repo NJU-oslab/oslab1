@@ -5,7 +5,8 @@
 static void pmm_init();
 static void *pmm_alloc(size_t size);
 static void pmm_free(void *ptr);
-/*
+
+
 static void *current;
 
 struct _Block {
@@ -106,7 +107,9 @@ static void pmm_free(void *ptr) {
 	}
 	if (p->start == ptr)
 		p->free = 1;
-}*/
+}
+
+/*
 
 static spinlock_t pmm_lock;
 static void *cur = NULL;
@@ -249,4 +252,4 @@ static void pmm_free(void *ptr){
 	free_unsafe(ptr);
 	kmt->spin_unlock(&pmm_lock);
 	TRACE_EXIT;
-}
+}*/
