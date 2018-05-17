@@ -189,7 +189,9 @@ static void kmt_sem_wait(sem_t *sem){
         kmt_spin_unlock(&sem_lock);
        // printf("lock name: %s\n", sem_lock.name);
         while (current_thread->runnable == 0){
+            kmt_spin_lock(&sem_lock);
             printf("current t: %x\n",current_thread);
+            kmt_spin_unlock(&sem_lock);
             //_putc('f');
         };
         //_yield();
