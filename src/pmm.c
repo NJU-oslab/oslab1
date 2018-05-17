@@ -5,7 +5,7 @@
 static void pmm_init();
 static void *pmm_alloc(size_t size);
 static void pmm_free(void *ptr);
-
+/*
 static void *current;
 
 struct _Block {
@@ -106,8 +106,8 @@ static void pmm_free(void *ptr) {
 	}
 	if (p->start == ptr)
 		p->free = 1;
-}
-/*
+}*/
+
 static spinlock_t pmm_lock;
 static void *cur = NULL;
 static size_t mul = 1;
@@ -202,12 +202,12 @@ static void* malloc_unsafe(size_t size) {
 	while (1) {
 		if (current->body.size >= size) {
 			if (current->body.size > size) {
-		//		current->body.size -= size;
-		//		current = (Block *)((char *)current + current->body.size);
-		//		current->body.size = size;
-				size = current->body.size;
-				prev->body.next = current->body.next;
-				freep = prev;
+				current->body.size -= size;
+				current = (Block *)((char *)current + current->body.size);
+				current->body.size = size;
+		//		size = current->body.size;
+		//		prev->body.next = current->body.next;
+		//		freep = prev;
 			}
 			else {
 				prev->body.next = current->body.next;
@@ -237,7 +237,7 @@ static void *pmm_alloc(size_t size){
 	void *ret = malloc_unsafe(size);
 	Log("malloc's ret: 0x%x", ret);
 	Log("RET mod 2^k = %d", (size_t)ret %mul);
-	assert((size_t)ret % mul == 0);
+//	assert((size_t)ret % mul == 0);
 	kmt->spin_unlock(&pmm_lock);
 	TRACE_EXIT;
 	return ret;
@@ -250,4 +250,3 @@ static void pmm_free(void *ptr){
 	kmt->spin_unlock(&pmm_lock);
 	TRACE_EXIT;
 }
-*/
