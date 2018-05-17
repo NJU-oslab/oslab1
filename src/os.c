@@ -70,19 +70,15 @@ static thread_t sem_test_thread[2];
 
 static void producer(void *arg) {
   while (1){
-    _putc('s');
     kmt->sem_wait(&empty);
-    _putc('t');
     printf("(");
     kmt->sem_signal(&fill);
   }
 }
 
 static void consumer(void *arg) {
-  printf("Hello world from consumer");
   while (1){
     kmt->sem_wait(&fill);
-    
     printf(")");
     kmt->sem_signal(&empty);
   }
