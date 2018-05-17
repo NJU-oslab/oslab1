@@ -81,7 +81,7 @@ static Block* allocate_new(size_t size) {
 	Log("new_mem: 0x%x", new_mem);
 	new_block = (Block *)new_mem;
 	new_block->body.size = size;
-	free_unsafe((void*)(new_block+1));
+	free_unsafe((void*)(new_block));
 	TRACE_EXIT;
 	return freep;
 }
