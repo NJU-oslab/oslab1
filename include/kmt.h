@@ -1,6 +1,6 @@
 #include "os.h"
 #define MAX_NAME_LEN 100
-#define MAX_STACK_SIZE 4096
+#define MAX_STACK_SIZE 4 * 1024 * 1024
 
 struct spinlock{
     int locked; 
