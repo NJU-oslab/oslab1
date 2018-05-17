@@ -8,7 +8,7 @@ static void pmm_free(void *ptr);
 
 static spinlock_t pmm_lock;
 static void *cur = NULL;
-static size_t power = 1;
+static size_t mul = 1;
 
 MOD_DEF(pmm) {
     .init = pmm_init,
@@ -58,13 +58,13 @@ static void free_unsafe(void *ptr) {
 
 static size_t align(size_t size) {
     size_t k = 0;
-	power = 1;
-	while (power < size) {
-		power <<= 1;
+	mul = 1;
+	while (mul < size) {
+		mul <<= 1;
 		k++;
 	}
-	printf("size: %d\t mul: %d\n", size, power);
-	return power;
+	printf("size: %d\t mul: %d\n", size, mul);
+	return mul;
 }
 
 static Block* allocate_new(size_t size) {
@@ -99,13 +99,14 @@ static void* malloc_unsafe(size_t size) {
 	current = prev->body.next;
 	while (1) {
 		if (current->body.size >= size) {
-			current->body.size -= size;
-			current = (Block *)((char *)current + current->body.size);
-			current->body.size = size;
-/*			while ((size_t)current % power != 0) {
-				current = (Block *)((char *)current - 1);
-				current->body.size++;
-			}*/
+			if (current->body.size > size) {
+				current->body.size -= size;
+				current = (Block *)((char *)current + current->body.size);
+				current->body.size = size;
+			}
+			else {
+				prev->body.next = current->body.next;
+			}
 			freep = prev;
 			TRACE_EXIT;
 			return (void *)(current);
@@ -130,7 +131,7 @@ static void *pmm_alloc(size_t size){
 	kmt->spin_lock(&pmm_lock);
 	void *ret = malloc_unsafe(size);
 	Log("malloc's ret: 0x%x", ret);
-	Log("RET mod 2^k = %d", (size_t)ret % power);
+	Log("RET mod 2^k = %d", (size_t)ret % mul);
 //	assert((size_t)ret % mul == 0);
 	kmt->spin_unlock(&pmm_lock);
 	TRACE_EXIT;
