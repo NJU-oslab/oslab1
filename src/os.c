@@ -110,6 +110,7 @@ static _RegSet *os_interrupt(_Event ev, _RegSet *regs) {
 //    Log("_EVENT_IRQ_TIMER");
     if (current_thread != NULL)
       current_thread->tf = regs;
+    printf("Event\n");
     current_thread = kmt->schedule();
     printf("%x\n",current_thread);
     return current_thread->tf;
