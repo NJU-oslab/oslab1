@@ -104,10 +104,10 @@ static void* malloc_unsafe(size_t size) {
 				current->body.size -= size;
 				current = (Block *)((char *)current + current->body.size);
 				current->body.size = size;
-				while ((size_t) current % mul != 0) {
+/*				while ((size_t) current % mul != 0) {
 					current = (Block *)((char *)current - 1);
 					current->body.size ++;
-				}
+				}*/
 			}
 			else {
 				prev->body.next = current->body.next;
