@@ -146,6 +146,7 @@ static thread_t *kmt_schedule(){
             next_thread = head;
     }
     current_thread = next_thread;
+    printf("Sc over\n");
     return next_thread;
 }
 static void kmt_spin_init(spinlock_t *lk, const char *name){
