@@ -85,11 +85,11 @@ void sem_test() {
 }
 
 static void os_run() {
+   _intr_write(1);
   alloc_test();
   Log("intr_status: %d", _intr_read());
   thread_test();
   sem_test();
-  _intr_write(1);
   while (1) ; // should never return
 }
 
