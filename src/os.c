@@ -70,6 +70,7 @@ static thread_t sem_test_thread[2];
 
 static void producer(void *arg) {
   while (1){
+    _put('s');
     kmt->sem_wait(&empty);
     _putc('t');
     printf("(");
