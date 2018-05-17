@@ -72,7 +72,7 @@ static Block* allocate_new(size_t size) {
 	void *new_mem;
 	Block *new_block;
 	printf("size: 0x%x\n", size);
-	if (2 * size + cur > _heap.end)
+	if (size + cur > _heap.end)
 		return NULL;
 	else {
 		new_mem = cur;
@@ -80,7 +80,7 @@ static Block* allocate_new(size_t size) {
 	}
 	Log("new_mem: 0x%x", new_mem);
 	new_block = (Block *)new_mem;
-	new_block->body.size = 2 * size;
+	new_block->body.size = size;
 	free_unsafe((void*)(new_block + 1));
 	TRACE_EXIT;
 	return freep;
@@ -104,10 +104,10 @@ static void* malloc_unsafe(size_t size) {
 				current->body.size -= size;
 				current = (Block *)((char *)current + current->body.size);
 				current->body.size = size;
-				while ((size_t) current % mul != 0) {
+/*				while ((size_t) current % mul != 0) {
 					current = (Block *)((char *)current - 1);
 					current->body.size ++;
-				}
+				}*/
 			}
 			else {
 				prev->body.next = current->body.next;
