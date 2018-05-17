@@ -90,7 +90,7 @@ static void kmt_teardown(thread_t *thread){
     }
     else if (cur == thread){
         pmm->free(head->stack.start);
-        head = NULL;
+        head = cur->next;
         find_flag = 1;
     }
     else {
