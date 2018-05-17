@@ -90,7 +90,7 @@ static void* malloc_unsafe(size_t size) {
 	TRACE_ENTRY;
 	Block *current, *prev;
 	prev = freep;
-	size = align(size);
+//	size = align(size);
 	if (prev == NULL) {
 		freep = prev = &base;
 		base.body.next = freep;
