@@ -61,6 +61,15 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     thread->tid = thread_cnt++;
     thread->tf = _make(thread->stack, entry, arg);
     Log("entry: 0x%x\targ: %d", entry, arg);
+
+    /* print threads' information*/
+    Log("Now, the thread information is as follows.");
+    thread_t *cur = head;
+    while (cur != NULL){
+        Log("thread %d: runnbale: %d", cur->tid, cur->runnable);
+    }
+
+
     kmt_spin_unlock(&thread_lock);
     TRACE_EXIT;
     return 0;
