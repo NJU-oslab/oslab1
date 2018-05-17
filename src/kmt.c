@@ -12,13 +12,13 @@ static void kmt_sem_init(sem_t *sem, const char *name, int value);
 static void kmt_sem_wait(sem_t *sem);
 static void kmt_sem_signal(sem_t *sem);
 
-static volatile int spin_cnt = 0;
-static volatile int intr_ready = 0;
-static volatile thread_t *current_thread = NULL;
-static volatile thread_t *head = NULL;
-static volatile int thread_cnt = 0;
-static volatile spinlock_t thread_lock;
-static volatile spinlock_t sem_lock;
+volatile static int spin_cnt = 0;
+volatile static int intr_ready = 0;
+static thread_t * volatile current_thread = NULL;
+static thread_t * volatile head = NULL;
+volatile static int thread_cnt = 0;
+volatile static spinlock_t thread_lock;
+volatile static spinlock_t sem_lock;
 
 MOD_DEF(kmt) {
     .init = kmt_init,
