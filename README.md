@@ -15,7 +15,7 @@
 </ul>
 <h3>Declaration</h3>
 <ul>
-<li><p><b>If you are Broccoli's classmate and haven't finished the lab, remember not to copy it rudely. Selectively borrowing my idea is allowed.</b></p></li>
+<li><p><b>If you are Broccoli's classmate and haven't finished the lab, remember not to copy it rudely, or you are responsible for any loss on your OS's score. Selectively borrowing my idea is allowed.</b></p></li>
 <li>For other users, you can clone, download or fork it at will.</li>
 <li>Broccoli is happy to receive any feedback on BUG in the project.</li>
 </ul>
