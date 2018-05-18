@@ -123,10 +123,6 @@ static void kmt_teardown(thread_t *thread){
 }
 static thread_t *kmt_schedule(){
 //    Log("Now, thread is %d", current_thread->tid);
-    thread_t * cnm = head;
-    while (cnm != NULL){
-        cnm = cnm->next;
-    }
     if (current_thread == NULL)
         current_thread = head;
     thread_t *next_thread = current_thread;
