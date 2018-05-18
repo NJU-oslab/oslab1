@@ -1,4 +1,4 @@
-CFLAGS  = -std=c99 -O2 -MMD -Wall -Werror -ggdb -fno-builtin \
+CFLAGS  = -std=c99 -MMD -O2 -Wall -Werror -ggdb -fno-builtin \
           -fno-pic -fno-stack-protector -fno-omit-frame-pointer \
           -m32 -march=i386 -I./am -I./framework -I./include
 LDFLAGS = -melf_i386 -Ttext 0x00100000 
@@ -21,7 +21,7 @@ clean:
 	rm -rf build
 
 submit:
-	cd .. && tar cj oslab0 > submission.tar.bz2
+	cd .. && tar cj oslab1 > submission.tar.bz2
 	curl -F "task=L1" -F "id=$(STUID)" -F "name=$(STUNAME)" -F "submission=@../submission.tar.bz2" 114.212.81.90:5000/upload
 
 build/kernel: $(OBJS)
