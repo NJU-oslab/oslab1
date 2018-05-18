@@ -19,8 +19,8 @@
   #define TRACE_EXIT ((void)0)
 #endif
 
-#define Log(format, ...)/* \
+#define Log(format, ...) \
   do { \
     printf("\33[1;34m[%s,%d,%s] " format "\33[0m\n", \
         __FILE__, __LINE__, __func__, ## __VA_ARGS__); \
-  } while (0)*/
+  } while (0)
