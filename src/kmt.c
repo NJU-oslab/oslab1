@@ -66,7 +66,7 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     Log("entry: 0x%x\targ: %d", entry, arg);
 
 
-    /* print threads' information*/
+    /* print threads' information
     Log("------------------------------------------");
     Log("Now, the thread information is as follows.");
     thread_t *cur = head;
@@ -74,7 +74,7 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
         Log("thread %d: runnbale: %d", cur->tid, cur->runnable);
         cur = cur->next;
     }
-    Log("------------------------------------------");
+    Log("------------------------------------------");*/
 
     kmt_spin_unlock(&thread_lock);
     TRACE_EXIT;
@@ -109,7 +109,7 @@ static void kmt_teardown(thread_t *thread){
         Log("Cannot find the thread you want to recycle.");
     }
 
-    /* print threads' information*/
+    /* print threads' information
     Log("------------------------------------------");
     Log("Now, the thread information is as follows.");
     thread_t *curr = head;
@@ -117,7 +117,7 @@ static void kmt_teardown(thread_t *thread){
         Log("thread %d: runnbale: %d", curr->tid, curr->runnable);
         curr = curr->next;
     }
-    Log("------------------------------------------");
+    Log("------------------------------------------");*/
 
     kmt_spin_unlock(&thread_lock);
 }
