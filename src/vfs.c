@@ -1,6 +1,6 @@
 #include "os.h"
 
-//static void vfs_init();
+static void vfs_init();
 static int vfs_access(const char *path, int mode);
 static int vfs_mount(const char *path, filesystem_t *fs);
 static int vfs_unmount(const char *path);
