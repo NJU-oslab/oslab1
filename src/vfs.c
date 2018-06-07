@@ -20,7 +20,7 @@ MOD_DEF(vfs){
     .write = vfs_write,
     .lseek = vfs_lseek,
     .close = vfs_close,
-}
+};
 
 static void vfs_init(){
 
@@ -55,5 +55,5 @@ static off_t vfs_lseek(int fd, off_t offset, int whence){
 }
 
 static int vfs_close(int fd){
-    
+
 }
