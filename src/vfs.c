@@ -1,4 +1,4 @@
-#include <os.h>
+#include "os.h"
 
 static void vfs_init();
 static int vfs_access(const char *path, int mode);
