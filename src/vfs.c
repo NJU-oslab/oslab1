@@ -22,6 +22,8 @@ MOD_DEF(vfs){
     .close = vfs_close,
 };
 
+static char fd_pool[MAX_FD_NUM];
+
 //procfs's implementation
 
 static fsops_t procfs_ops;
@@ -77,10 +79,18 @@ static file_t *create_file() {
 
 //vfs API
 
+static mount_path_t procfs_path;
+static mount_path_t devfs_path;
+static mount_path_t kvfs_path;
+
 static void vfs_init(){
+    memset(fd_pool, 0, sizeof(fd_pool));
     procfs_ops.init = &fsops_init;
     procfs_ops.lookup = &fsops_lookup;
     procfs_ops.close = &fsops_close;
+    strcpy(procfs_path.name, "/proc");
+    strcpy(devfs_path.name, "/dev");
+    strcpy(kvfs_path.name, "/");
 }
 
 static int vfs_access(const char *path, int mode){
@@ -88,10 +98,25 @@ static int vfs_access(const char *path, int mode){
 }
 
 static int vfs_mount(const char *path, filesystem_t *fs){
+    switch (fs->fs_type){
+    case PROCFS: procfs_path.fs = fs; fs->path = &procfs_path; break;
+    case DEVFS: devfs_path.fs = fs; fs->path = &devfs_path; break;
+    case KVFS: kvfs_path.fs = fs; fs->path = &kvfs_path; break;
+    default: break;
+    }
     return 0;
 }
 
 static int vfs_unmount(const char *path){
+    if (strcmp(path, procfs_path.name) == 0){
+        procfs_path.fs = NULL;
+    }
+    else if (strcmp(path, devfs_path.name) == 0){
+        devfs_path.fs = NULL;
+    }
+    else if (strcmp(path, kvfs_path.name) == 0){
+        kvfs_path.fs = NULL;
+    }
     return 0;
 }
 

@@ -2,15 +2,22 @@
 #define MAX_FS_NAME_LEN 128
 #define MAX_INODE_NAME_LEN 128
 #define MAX_INODE_CONTENT_LEN 1024
+#define MAX_FD_NUM 4096
+#define MAX_PATH_LEN 128
 
 typedef struct fsops fsops_t;
 typedef struct fileops fileops_t;
 typedef struct file file_t;
 typedef struct inode inode_t;
 typedef struct filesystem filesystem_t;
+typedef struct mount_path mount_path_t;
 
 enum open_flags{
-  O_RDONLY, O_WRONLY, O_RDWR
+    O_RDONLY, O_WRONLY, O_RDWR
+};
+
+enum fstype{
+    PROCFS, DEVFS, KVFS
 };
 
 struct fsops {
@@ -28,6 +35,7 @@ struct fileops {
 
 struct file{
     fileops_t *ops;
+    int open_offset;
 };
 
 struct inode{
@@ -37,5 +45,13 @@ struct inode{
 
 struct filesystem{
     char name[MAX_FS_NAME_LEN];
+    mount_path_t *path;
     fsops_t *ops;
+    int fs_type;
+    inode_t *dev;
 };
+
+struct mount_path{
+    char name[MAX_PATH_LEN];
+    filesystem_t *fs;
+}
