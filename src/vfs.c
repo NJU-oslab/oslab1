@@ -22,8 +22,39 @@ MOD_DEF(vfs){
     .close = vfs_close,
 };
 
-static void vfs_init(){
+//procfs's implementation
 
+static fsops_t procfs_ops;
+static fsops_t devfs_ops;
+static fsops_t kvfs_ops;
+
+static void fsops_init(struct filesystem *fs, const char *name, inode_t *dev){
+
+}
+
+static inode_t *fsops_lookup(struct filesystem *fs, const char *path, int flags){
+    return NULL;
+}
+
+static int fsops_close(inode_t *inode){
+    return 0;
+}
+
+static filesystem_t *create_procfs() {
+    filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
+    if (!fs) panic("fs allocation failed");
+    fs->ops = &procfs_ops;
+    fs->ops->init(fs, "procfs", NULL);
+    return fs;
+}
+
+
+//vfs API
+
+static void vfs_init(){
+    procfs_ops.init = &fsops_init;
+    procfs_ops.lookup = &fsops_lookup;
+    procfs_ops.close = &fsops_close;
 }
 
 static int vfs_access(const char *path, int mode){
