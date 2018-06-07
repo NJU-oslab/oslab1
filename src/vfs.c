@@ -48,6 +48,32 @@ static filesystem_t *create_procfs() {
     return fs;
 }
 
+//file's implementation
+
+static fileops_t file_ops;
+
+static int fileops_open(inode_t *inode, file_t *file, int flags){
+    return 0;
+}
+
+static ssize_t fileops_read(inode_t *inode, file_t *file, char *buf, size_t size){
+    return 0;
+}
+
+static ssize_t fileops_write(inode_t *inode, file_t *file, const char *buf, size_t size){
+    return 0;
+}
+
+static off_t fileops_lseek(inode_t *inode, file_t *file, off_t offset, int whence){
+    return 0;
+}
+
+static file_t *create_file() {
+    file_t *new_file = (file_t *)pmm->alloc(sizeof(file_t));
+    if (!new_file) panic("file allocation failed");
+    new_file->ops = &file_ops;
+    return new_file;
+}
 
 //vfs API
 

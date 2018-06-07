@@ -14,8 +14,8 @@ enum open_flags{
 };
 
 struct fsops {
-    void (*init)(struct filesystem *fs, const char *name, inode_t *dev);
-    inode_t *(*lookup)(struct filesystem *fs, const char *path, int flags);
+    void (*init)(filesystem_t *fs, const char *name, inode_t *dev);
+    inode_t *(*lookup)(filesystem_t *fs, const char *path, int flags);
     int (*close)(inode_t *inode);
 };
 
