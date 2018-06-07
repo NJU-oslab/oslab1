@@ -82,7 +82,7 @@ static file_t *create_file() {
 static mount_path_t procfs_path;
 static mount_path_t devfs_path;
 static mount_path_t kvfs_path;
-/*
+
 static void vfs_init(){
     memset(fd_pool, 0, sizeof(fd_pool));
     procfs_ops.init = &fsops_init;
@@ -138,4 +138,4 @@ static off_t vfs_lseek(int fd, off_t offset, int whence){
 
 static int vfs_close(int fd){
     return 0;
-}*/
+}

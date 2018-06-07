@@ -1,4 +1,3 @@
-#include "os.h"
 #define MAX_FS_NAME_LEN 128
 #define MAX_INODE_NAME_LEN 128
 #define MAX_INODE_CONTENT_LEN 1024
