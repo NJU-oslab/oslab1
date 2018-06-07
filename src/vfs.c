@@ -83,14 +83,14 @@ static mount_path_t procfs_path;
 static mount_path_t devfs_path;
 static mount_path_t kvfs_path;
 
-static void vfs_init(){
+static void vfs_init(){/*
     memset(fd_pool, 0, sizeof(fd_pool));
     procfs_ops.init = &fsops_init;
     procfs_ops.lookup = &fsops_lookup;
     procfs_ops.close = &fsops_close;
     strcpy(procfs_path.name, "/proc");
     strcpy(devfs_path.name, "/dev");
-    strcpy(kvfs_path.name, "/");
+    strcpy(kvfs_path.name, "/");*/
 }
 
 static int vfs_access(const char *path, int mode){
