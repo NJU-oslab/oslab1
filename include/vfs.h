@@ -17,6 +17,10 @@ enum open_flags{
     O_RDONLY, O_WRONLY, O_RDWR
 };
 
+enum access_modes{
+    R_OK, W_OK, X_OK, F_OK
+};
+
 enum fstype{
     PROCFS, DEVFS, KVFS
 };
@@ -38,6 +42,7 @@ struct file{
     char name[MAX_INODE_NAME_LEN];
     char content[MAX_INODE_CONTENT_LEN];
     fileops_t *ops;
+    inode_t *f_inode;
     int open_offset;
     int fd;
 };
