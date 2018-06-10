@@ -39,7 +39,7 @@ static void fsops_init(struct filesystem *fs, const char *name, inode_t *dev){
         else if (strcmp("kvfs", name) == 0)
             fs->fs_type = KVFS;
         else
-            panic("a filesystem is created but cannot be identified.");
+            Log("a filesystem is created but cannot be identified.");
     }
     fs->dev = dev;
 }
@@ -54,7 +54,7 @@ static int fsops_close(inode_t *inode){
 
 static filesystem_t *create_procfs() {
     filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
-    if (!fs) panic("fs allocation failed");
+    if (!fs) Log("fs allocation failed");
     fs->ops = &procfs_ops;
     fs->ops->init(fs, "procfs", NULL);
     vfs->mount("/proc", fs);
@@ -89,6 +89,7 @@ static mount_path_t kvfs_path;
 
 static void vfs_init(){
     memset(fd_pool, 0, sizeof(fd_pool));
+    fd_pool[0] = fd_pool[1] = fd_pool[2] = 1;
     procfs_ops.init = &fsops_init;
     procfs_ops.lookup = &fsops_lookup;
     procfs_ops.close = &fsops_close;
@@ -114,7 +115,7 @@ static int vfs_access(const char *path, int mode){
         open_inode = kvfs_path.fs->ops->lookup(kvfs_path.fs, path, mode);
     }
     else{
-        panic("Cannot find the path.");
+        Log("Cannot find the path.");
         return -1;
     }
 
@@ -124,11 +125,11 @@ static int vfs_access(const char *path, int mode){
         case W_OK:  if (open_inode->can_write == 1) return 0; else return -1;
         case X_OK:  return -1;
         case F_OK:  return 0;
-        default: panic("Undefined mode."); return -1;
+        default: Log("Undefined mode."); return -1;
         }
     }
     else{
-        panic("Cannot find the path you want to lookup.");
+        Log("Cannot find the path you want to lookup.");
         return -1;
     }
 }
@@ -168,7 +169,7 @@ static int vfs_open(const char *path, int flags){
         open_inode = kvfs_path.fs->ops->lookup(kvfs_path.fs, path, flags);
     }
     else{
-        panic("Cannot find the path.");
+        Log("Cannot find the path.");
         return -1;
     }
 
@@ -176,30 +177,30 @@ static int vfs_open(const char *path, int flags){
         int ret_fd = -1;
         file_t *f = (file_t *)pmm->alloc(sizeof(file_t));
         if (!f) {
-            panic("file allocation failed");
+            Log("file allocation failed");
             return -1;
         }
         f->ops = &file_ops;
         ret_fd = f->ops->open(open_inode, f, flags);
         if (ret_fd < 0){
-            panic("file open error");
+            Log("file open error");
             return -1;
         }
         //TODO assign the fd is implemented in ops 
         int i;
-        for (i = 0; i < MAX_FILE_NUM; i++){
+        for (i = 3; i < MAX_FILE_NUM; i++){
             if (file_pool[i] == NULL){
                 file_pool[i] = f;
             }
         }
         if (i == MAX_FILE_NUM){
-            panic("File pool is full, you cannot open more files.");
+            Log("File pool is full, you cannot open more files.");
             return -1;
         }
         return ret_fd;
     }
     else{
-        panic("Cannot find the path you want to lookup.");
+        Log("Cannot find the path you want to lookup.");
         return -1;
     }
 }
@@ -212,7 +213,7 @@ static ssize_t vfs_read(int fd, void *buf, size_t nbyte){
         }
     }
     if (i == MAX_FILE_NUM){
-        panic("Cannot find the fd, so read failed.");
+        Log("Cannot find the fd, so read failed.");
         return -1;
     }
     return file_pool[i]->ops->read(file_pool[i]->f_inode, file_pool[i], buf, nbyte);
@@ -226,7 +227,7 @@ static ssize_t vfs_write(int fd, void *buf, size_t nbyte){
         }
     }
     if (i == MAX_FILE_NUM){
-        panic("Cannot find the fd, so write failed.");
+        Log("Cannot find the fd, so write failed.");
         return -1;
     }
     return file_pool[i]->ops->write(file_pool[i]->f_inode, file_pool[i], buf, nbyte);
@@ -240,7 +241,7 @@ static off_t vfs_lseek(int fd, off_t offset, int whence){
         }
     }
     if (i == MAX_FILE_NUM){
-        panic("Cannot find the fd, so lseek failed.");
+        Log("Cannot find the fd, so lseek failed.");
         return -1;
     }
     return file_pool[i]->ops->lseek(file_pool[i]->f_inode, file_pool[i], offset, whence);
@@ -254,7 +255,7 @@ static int vfs_close(int fd){
         }
     }
     if (i == MAX_FILE_NUM){
-        panic("Cannot find the fd, so write failed.");
+        Log("Cannot find the fd, so write failed.");
         return -1;
     }
     pmm->free(file_pool[i]);
