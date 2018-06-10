@@ -97,6 +97,10 @@ static void vfs_init(){
     strcpy(procfs_path.name, "/proc");
     strcpy(devfs_path.name, "/dev");
     strcpy(kvfs_path.name, "/");
+    file_ops.open = &fileops_open;
+    file_ops.read = &fileops_read;
+    file_ops.write = &fileops_write;
+    file_ops.lseek = &fileops_lseek;
 }
 
 static int vfs_access(const char *path, int mode){
