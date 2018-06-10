@@ -23,6 +23,7 @@ MOD_DEF(vfs){
 };
 
 static char fd_pool[MAX_FD_NUM];
+static file_t file_pool[MAX_FILE_NUM];
 
 //procfs's implementation
 
@@ -31,7 +32,18 @@ static fsops_t devfs_ops;
 static fsops_t kvfs_ops;
 
 static void fsops_init(struct filesystem *fs, const char *name, inode_t *dev){
-
+    if (name != NULL) {
+        strcpy(fs->name, name);
+        if (strcmp("procfs", name) == 0)
+            fs->fs_type = PROCFS;
+        else if (strcmp("devfs", name) == 0)
+            fs->fs_type = DEVFS;
+        else if (strcmp("kvfs", name) == 0)
+            fs->fs_type = KVFS;
+        else
+            panic("a filesystem is created but cannot be identified.");
+    }
+    fs->dev = dev;
 }
 
 static inode_t *fsops_lookup(struct filesystem *fs, const char *path, int flags){
@@ -47,6 +59,7 @@ static filesystem_t *create_procfs() {
     if (!fs) panic("fs allocation failed");
     fs->ops = &procfs_ops;
     fs->ops->init(fs, "procfs", NULL);
+    vfs->mount("/proc", fs);
     return fs;
 }
 
@@ -68,13 +81,6 @@ static ssize_t fileops_write(inode_t *inode, file_t *file, const char *buf, size
 
 static off_t fileops_lseek(inode_t *inode, file_t *file, off_t offset, int whence){
     return 0;
-}
-
-static file_t *create_file() {
-    file_t *new_file = (file_t *)pmm->alloc(sizeof(file_t));
-    if (!new_file) panic("file allocation failed");
-    new_file->ops = &file_ops;
-    return new_file;
 }
 
 //vfs API
@@ -121,10 +127,44 @@ static int vfs_unmount(const char *path){
 }
 
 static int vfs_open(const char *path, int flags){
-    return 0;
+    inode_t *open_inode = NULL;
+    if (strncmp("/proc", path, 5) == 0){
+        open_inode = procfs_path.fs->ops->lookup(procfs_path.fs, path, flags);
+    }
+    else if (strncmp("/dev", path, 4) == 0){
+        open_inode = devfs_path.fs->ops->lookup(devfs_path.fs, path, flags);
+    }
+    else if (strncmp("/", path, 1) == 0){
+        open_inode = kvfs_path.fs->ops->lookup(kvfs_path.fs, path, flags);
+    }
+    else{
+        panic("Cannot find the path.");
+        return -1;
+    }
+
+    if (open_inode != NULL){
+        int ret_fd = -1;
+        file_t *f = (file_t *)pmm->alloc(sizeof(file_t));
+        if (!f) {
+            panic("file allocation failed");
+            return -1;
+        }
+        f->ops = &file_ops;
+        ret_fd = f->ops->open(open_inode, f, flags);
+        if (ret_fd < 0){
+            panic("file open error");
+            return -1;
+        }
+        return ret_fd;
+    }
+    else{
+        panic("Cannot find the path you want to lookup.");
+        return -1;
+    }
 }
 
 static ssize_t vfs_read(int fd, void *buf, size_t nbyte){
+
     return 0;
 }
 

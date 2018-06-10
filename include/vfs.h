@@ -4,6 +4,7 @@
 #define MAX_INODE_CONTENT_LEN 1024
 #define MAX_FD_NUM 4096
 #define MAX_PATH_LEN 128
+#define MAX_FILE_NUM 512
 
 typedef struct fsops fsops_t;
 typedef struct fileops fileops_t;
@@ -34,13 +35,19 @@ struct fileops {
 };
 
 struct file{
+    char name[MAX_INODE_NAME_LEN];
+    char content[MAX_INODE_CONTENT_LEN];
     fileops_t *ops;
     int open_offset;
+    int fd;
 };
 
 struct inode{
     char name[MAX_INODE_NAME_LEN];
     char content[MAX_INODE_CONTENT_LEN];
+    int open_thread_num;
+    char can_read;
+    char can_write;
 };
 
 struct filesystem{
