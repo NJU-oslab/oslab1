@@ -28,8 +28,6 @@ static file_t *file_pool[MAX_FILE_NUM];
 //procfs's implementation
 
 static fsops_t procfs_ops;
-static fsops_t devfs_ops;
-static fsops_t kvfs_ops;
 
 static void fsops_init(struct filesystem *fs, const char *name, inode_t *dev){
     if (name != NULL) {
