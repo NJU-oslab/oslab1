@@ -17,10 +17,6 @@ enum open_flags{
     O_RDONLY, O_WRONLY, O_RDWR
 };
 
-enum access_modes{
-    R_OK, W_OK, X_OK, F_OK
-};
-
 enum fstype{
     PROCFS, DEVFS, KVFS
 };
