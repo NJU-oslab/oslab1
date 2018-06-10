@@ -121,7 +121,7 @@ static int vfs_access(const char *path, int mode){
         case W_OK:  if (open_inode->can_write == 1) return 0; else return -1;
         case X_OK:  return -1;
         case F_OK:  return 0;
-        default:
+        default: panic("Undefined mode."); return -1;
         }
     }
     else{
