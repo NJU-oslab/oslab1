@@ -7,6 +7,7 @@
 #include "kmt.h"
 #include "pmm.h"
 #include "vfs.h"
+#include "device.h"
 
 static inline void puts(const char *p) {
   for (; *p; p++) {

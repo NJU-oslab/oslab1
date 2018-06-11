@@ -35,9 +35,11 @@ static file_t *file_pool[MAX_FILE_NUM];
 //procfs's implementation
 
 static fsops_t procfs_ops;
+static fsops_t devfs_ops;
 static fsops_t kvfs_ops;
 
-static void fsops_init(struct filesystem *fs, const char *name, inode_t *dev){
+static void fsops_init(struct filesystem *fs, const char *name){
+    TRACE_ENTRY;
     if (name != NULL) {
         strcpy(fs->name, name);
         if (strcmp("procfs", name) == 0)
@@ -51,30 +53,18 @@ static void fsops_init(struct filesystem *fs, const char *name, inode_t *dev){
     }
     for (int i = 0; i < MAX_INODE_NUM; i++)
         fs->inodes[i] = NULL;
-    fs->dev = dev;
+    TRACE_EXIT;
 }
 
 static inode_t *fsops_lookup(struct filesystem *fs, const char *path){
-    switch (fs->fs_type){
-    case PROCFS:{
-        for (int i = 0; i < MAX_INODE_NUM; i++){
-            if (fs->inodes[i] != NULL && strcmp(fs->inodes[i]->name, path) == 0){
-                return fs->inodes[i];
-            }
+    TRACE_ENTRY;
+    for (int i = 0; i < MAX_INODE_NUM; i++){
+        if (fs->inodes[i] != NULL && strcmp(fs->inodes[i]->name, path) == 0){
+            TRACE_EXIT;
+            return fs->inodes[i];
         }
-        break;
     }
-    case DEVFS://TODO:
-    case KVFS: {
-        for (int i = 0; i < MAX_INODE_NUM; i++){
-            if (fs->inodes[i] != NULL && strcmp(fs->inodes[i]->name, path) == 0){
-                return fs->inodes[i];
-            }
-        }
-        break;
-    }
-    default: break;
-    }
+    TRACE_EXIT;
     return NULL;
 }
 
@@ -82,21 +72,15 @@ static int fsops_close(inode_t *inode){
     return 0;
 }
 
-static filesystem_t *create_procfs() {
-    filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
-    if (!fs) panic("fs allocation failed");
-    fs->ops = &procfs_ops;
-    fs->ops->init(fs, "procfs", NULL);
-    vfs->mount("/proc", fs);
-    return fs;
-}
 
-static void create_procinodes() {
+static void create_procinodes(filesystem_t *fs) {
+    TRACE_ENTRY;
     inode_t *cpuinfo_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
     if (!cpuinfo_inode) panic("inode allocation failed");
     cpuinfo_inode->can_read = 1;
     cpuinfo_inode->can_write = 1;
     cpuinfo_inode->open_thread_num = 0;
+    cpuinfo_inode->fs = fs;
     strcpy(cpuinfo_inode->name, procfs_path.name);
     strcat(cpuinfo_inode->name, "/cpuinfo");
     strcpy(cpuinfo_inode->content, "This is the cpuinfo file.\n");
@@ -118,6 +102,7 @@ static void create_procinodes() {
     meminfo_inode->can_read = 1;
     meminfo_inode->can_write = 1;
     meminfo_inode->open_thread_num = 0;
+    meminfo_inode->fs = fs;
     strcpy(meminfo_inode->name, procfs_path.name);
     strcat(meminfo_inode->name, "/meminfo");
     strcpy(meminfo_inode->content, "This is the meminfo file.\n");
@@ -131,17 +116,19 @@ static void create_procinodes() {
         Log("The procfs's inode pool is full.");
         return;
     }
+    TRACE_EXIT;
  //   Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
 }
 
-static void create_kvinodes(){
+static void create_kvinodes(filesystem_t *fs){
     inode_t *kv_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
     if (!kv_inode) panic("inode allocation failed");
     kv_inode->can_read = 1;
     kv_inode->can_write = 1;
     kv_inode->open_thread_num = 0;
+    kv_inode->fs = fs;
     strcpy(kv_inode->name, kvfs_path.name);
-    strcat(kv_inode->name, "/a.txt");
+    strcat(kv_inode->name, "a.txt");
     int i;
     for (i = 0; i < MAX_INODE_NUM; i++){
         if (kvfs_path.fs->inodes[i] == NULL){
@@ -155,16 +142,89 @@ static void create_kvinodes(){
     }
 }
 
+static void create_devinodes(filesystem_t *fs){
+    inode_t *null_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
+    if (!null_inode) panic("inode allocation failed");
+    null_inode->can_read = 1;
+    null_inode->can_write = 1;
+    null_inode->open_thread_num = 0;
+    null_inode->fs = fs;
+    strcpy(null_inode->name, devfs_path.name);
+    strcat(null_inode->name, "/null");
+    int i;
+    for (i = 0; i < MAX_INODE_NUM; i++){
+        if (devfs_path.fs->inodes[i] == NULL){
+            devfs_path.fs->inodes[i] = null_inode;
+            break;
+        }
+    }
+    if (i == MAX_INODE_NUM){
+        Log("The devfs's inode pool is full.");
+        return;
+    }
+
+    inode_t *zero_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
+    if (!zero_inode) panic("inode allocation failed");
+    zero_inode->can_read = 1;
+    zero_inode->can_write = 1;
+    zero_inode->open_thread_num = 0;
+    zero_inode->fs = fs;
+    strcpy(zero_inode->name, devfs_path.name);
+    strcat(zero_inode->name, "/zero");
+    for (i = 0; i < MAX_INODE_NUM; i++){
+        if (devfs_path.fs->inodes[i] == NULL){
+            devfs_path.fs->inodes[i] = zero_inode;
+            break;
+        }
+    }
+    if (i == MAX_INODE_NUM){
+        Log("The devfs's inode pool is full.");
+        return;
+    }
+
+    inode_t *random_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
+    if (!random_inode) panic("inode allocation failed");
+    random_inode->can_read = 1;
+    random_inode->can_write = 1;
+    random_inode->open_thread_num = 0;
+    random_inode->fs = fs;
+    strcpy(random_inode->name, devfs_path.name);
+    strcat(random_inode->name, "/random");
+    for (i = 0; i < MAX_INODE_NUM; i++){
+        if (devfs_path.fs->inodes[i] == NULL){
+            devfs_path.fs->inodes[i] = random_inode;
+            break;
+        }
+    }
+    if (i == MAX_INODE_NUM){
+        Log("The devfs's inode pool is full.");
+        return;
+    }
+}
+
+static filesystem_t *create_procfs() {
+    filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
+    if (!fs) panic("fs allocation failed");
+    fs->ops = &procfs_ops;
+    fs->ops->init(fs, "procfs");
+    vfs->mount("/proc", fs);
+    return fs;
+}
+
 static filesystem_t *create_devfs() {
-    //TODO:
-    return NULL;
+    filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
+    if (!fs) panic("fs allocation failed");
+    fs->ops = &devfs_ops;
+    fs->ops->init(fs, "devfs");
+    vfs->mount("/dev", fs);
+    return fs;
 }
 
 static filesystem_t *create_kvfs() {
     filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
     if (!fs) panic("fs allocation failed");
     fs->ops = &kvfs_ops;
-    fs->ops->init(fs, "kvfs", NULL);
+    fs->ops->init(fs, "kvfs");
     vfs->mount("/", fs);
     return fs;
 }
@@ -215,6 +275,27 @@ static ssize_t fileops_read(inode_t *inode, file_t *file, char *buf, size_t size
         printf("Read permission denied.\n");
         return -1;
     }
+    if (inode->fs->fs_type == DEVFS){
+        if (strcmp(inode->name, "/dev/null") == 0){
+            return -1;
+        }
+        else if (strcmp(inode->name, "/dev/zero") == 0){
+            if (size + file->open_offset > MAX_INODE_CONTENT_LEN)
+                size = strlen(file->content) - file->open_offset;
+            for (int i = 0; i < size; i++)
+                buf[i] = 0;
+            file->open_offset += size;
+            return size;
+        }
+        else if (strcmp(inode->name, "/dev/random") == 0){
+            if (size + file->open_offset > MAX_INODE_CONTENT_LEN)
+                size = strlen(file->content) - file->open_offset;
+            for (int i = 0; i < size; i++)
+                buf[i] = rand() % 256 - 128;
+            file->open_offset += size;
+            return size;
+        }
+    }
     if (size + file->open_offset > strlen(file->content)){
         size = strlen(file->content) - file->open_offset;
     }
@@ -233,6 +314,17 @@ static ssize_t fileops_write(inode_t *inode, file_t *file, const char *buf, size
     if (file->can_write == 0){
         printf("Write permission denied.\n");
         return -1;
+    }
+    if (inode->fs->fs_type == DEVFS){
+        if (strcmp(inode->name, "/dev/null") == 0){
+            return 0;
+        }
+        else if (strcmp(inode->name, "/dev/zero") == 0){
+            return 0;
+        }
+        else if (strcmp(inode->name, "/dev/random") == 0){
+            return 0;
+        }
     }
     if (size > MAX_INODE_CONTENT_LEN)
         size = MAX_INODE_CONTENT_LEN;
@@ -297,6 +389,10 @@ static void spinlock_init(){
     kmt->spin_init(&fs_lock, "fs_lock");
 }
 
+static void rand_init(){
+    srand(uptime());
+}
+
 static void pool_init(){
     memset(fd_pool, 0, sizeof(fd_pool));
     fd_pool[0] = fd_pool[1] = fd_pool[2] = 1;
@@ -313,6 +409,10 @@ static void oop_func_init(){
     kvfs_ops.lookup = &fsops_lookup;
     kvfs_ops.close = &fsops_close;
 
+    devfs_ops.init = &fsops_init;
+    devfs_ops.lookup = &fsops_lookup;
+    devfs_ops.close = &fsops_close;
+
     file_ops.open = &fileops_open;
     file_ops.read = &fileops_read;
     file_ops.write = &fileops_write;
@@ -321,17 +421,20 @@ static void oop_func_init(){
 }
 
 static void fs_init(){
-    create_procfs();
-    create_devfs();
-    create_kvfs();
-    create_procinodes();
-    create_kvinodes();
+    filesystem_t *fs;
+    fs = create_procfs();
+    create_procinodes(fs);
+    fs = create_devfs();
+    create_devinodes(fs);
+    fs = create_kvfs();
+    create_kvinodes(fs);
 }
 
 //vfs API
 
 static void vfs_init(){
     spinlock_init();
+    rand_init();
     pool_init();
     oop_func_init();
     fs_init();

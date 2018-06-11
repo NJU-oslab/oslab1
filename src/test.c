@@ -92,15 +92,38 @@ void sem_test() {
 //  printf("sem_test end\n============================");
 }
 
+/*
 static thread_t fs_test_thread[5];
 
 static void fs_test_func(void *tid){
     while (1);
+}*/
+
+static int random_number(int min, int max)
+{
+	static int dev_random_fd = -1;
+	char *next_random_byte;
+	int bytes_to_read;
+	unsigned random_value;
+	assert( max > min );
+	if( dev_random_fd == -1){
+		dev_random_fd = vfs->open( "/dev/random", O_RDONLY);
+		assert( dev_random_fd != -1);
+  }
+	next_random_byte = ( char * ) &random_value;
+	bytes_to_read = sizeof( random_value );
+	do {
+		int bytes_read;
+		bytes_read = vfs->read( dev_random_fd, next_random_byte, bytes_to_read );
+		bytes_to_read -= bytes_read;
+		next_random_byte += bytes_read;
+	} while ( bytes_to_read > 0 );
+	return min + ( random_value % ( max - min + 1 ));
 }
 
 void fs_init_test() {
   Log("fs_init_test begin");
-  int i;
+/*  int i;
   for (i = 0; i < 5; i++){
     kmt->create(&fs_test_thread[i], fs_test_func, (void *)i);
     Log("Thread %d created.", i);
@@ -126,5 +149,29 @@ void fs_init_test() {
   assert(vfs->access("/proc/1/status", F_OK) == 0);
   assert(vfs->access("/proc/1/status", R_OK) == 0);
   assert(vfs->access("/proc/1/status", W_OK) == 0);
-  assert(vfs->access("/proc/1/status", X_OK) == -1);
+  assert(vfs->access("/proc/1/status", X_OK) == -1);*/
+
+  /*
+  int fd = vfs->open("/a.txt", O_RDWR);
+  if (fd == -1){
+    panic("open failed.\n");
+  }
+  assert(vfs->access("/a.txt", W_OK) == -1);
+  char buf[200];
+  if (vfs->write(fd, "1234", 4) == -1)
+    panic("write failed");
+  if (vfs->read(fd, buf, sizeof(buf) - 1) == -1)
+    panic("read failed");
+  printf("buf------\n%s\n", buf);
+  vfs->close(fd);
+  assert(vfs->access("/a.txt", F_OK) == 0);
+  assert(vfs->access("/a.txt", R_OK) == 0);
+  assert(vfs->access("/a.txt", W_OK) == 0);
+  assert(vfs->access("/a.txt", X_OK) == -1);*/
+
+  int test = 5;
+	while(test--)
+    printf("%d\n", random_number(1,10));
+
+  Log("fs_init_test end");
 }
