@@ -24,8 +24,7 @@ enum fstype{
 
 struct fsops {
     void (*init)(filesystem_t *fs, const char *name, inode_t *dev);
-    inode_t *(*lookup_open)(filesystem_t *fs, const char *path, int flags);
-    inode_t *(*lookup_access)(filesystem_t *fs, const char *path, int mode);
+    inode_t *(*lookup)(filesystem_t *fs, const char *path);
     int (*close)(inode_t *inode);
 };
 
@@ -54,6 +53,7 @@ struct inode{
     int open_thread_num;
     char can_read;
     char can_write;
+    int pid;
 };
 
 struct filesystem{

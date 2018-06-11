@@ -36,13 +36,14 @@ MOD_DEF(kmt) {
 
 //changes made by kmt_create to the filesystem /proc/[pid]
 
-static void update_procfs_inodes(thread_t *thread){
+static void add_procfs_inodes(thread_t *thread){
     inode_t *new_proc_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
     if (!new_proc_inode) panic("inode allocation failed");
 
     new_proc_inode->can_read = 1;
-    new_proc_inode->can_write = 0;
+    new_proc_inode->can_write = 1;
     new_proc_inode->open_thread_num = 0;
+    new_proc_inode->pid = thread->tid;
 
     char pid[10], runnable[10], tf[200];
     sprintf(pid, "%d", thread->tid);
@@ -73,7 +74,7 @@ static void update_procfs_inodes(thread_t *thread){
         Log("The procfs's inode pool is full.");
         return;
     }
-    Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
+ //   Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
 }
 
 static void kmt_init(){
@@ -96,7 +97,7 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     thread->tid = thread_cnt++;
     thread->tf = _make(thread->stack, entry, arg);
 
-    update_procfs_inodes(thread);
+    add_procfs_inodes(thread);
 
     thread_t *new_thread = thread;
     if (thread_head == NULL){
@@ -142,6 +143,18 @@ static void kmt_teardown(thread_t *thread){
         while (cur->next != NULL){
             if (cur->next == thread){
                 thread_t *p = cur->next;
+                int i;
+                for (i = 0; i < MAX_INODE_NUM; i++){
+                    if (procfs_path.fs->inodes[i]->pid == cur->next->tid){
+                        pmm->free(procfs_path.fs->inodes[i]);
+                        procfs_path.fs->inodes[i] = NULL;
+                        break;
+                    }
+                }
+                if (i == MAX_INODE_NUM){
+                    panic("Cannot delete the according proc inode.");
+                    assert(0);
+                }
                 pmm->free(cur->next->stack.start);
                 cur->next = p->next;
                 find_flag = 1;

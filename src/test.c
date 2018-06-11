@@ -1,5 +1,7 @@
 #include "os.h"
 
+extern void print_proc_inodes();
+
 void alloc_test() {
   Log("alloc_test begin...");
   Log("intr_status: %d", _intr_read());
@@ -103,4 +105,21 @@ void fs_init_test() {
     kmt->create(&fs_test_thread[i], fs_test_func, (void *)i);
     Log("Thread %d created.", i);
   }
+  kmt->teardown(&fs_test_thread[2]);
+  Log("Thread 2 deleted.");
+  print_proc_inodes();
+  int fd = vfs->open("/proc/1/status", O_RDWR);
+  if (fd == -1){
+    panic("open failed.\n");
+  }
+  char buf[200];
+  if (vfs->read(fd, buf, sizeof(buf) - 1) == -1)
+    panic("read failed");
+  printf("buf------\n%s\n", buf);
+  if (vfs->write(fd, "1234", 4) == -1)
+    panic("write failed");
+  if (vfs->read(fd, buf, sizeof(buf) - 1) == -1)
+    panic("read failed");
+  printf("buf------\n%s\n", buf);
+  vfs->close(fd);
 }
