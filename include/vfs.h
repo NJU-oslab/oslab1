@@ -63,7 +63,6 @@ struct filesystem{
     int fs_type;
     inode_t *dev;
     inode_t *inodes[MAX_INODE_NUM];
-    int inode_num;
 };
 
 struct mount_path{

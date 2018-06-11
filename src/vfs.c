@@ -12,7 +12,7 @@ static int vfs_close(int fd);
 
 extern thread_t *thread_head;
 
-static mount_path_t procfs_path;
+mount_path_t procfs_path;
 static mount_path_t devfs_path;
 static mount_path_t kvfs_path;
 
@@ -47,7 +47,8 @@ static void fsops_init(struct filesystem *fs, const char *name, inode_t *dev){
         else
             Log("a filesystem is created but cannot be identified.");
     }
-    fs->inode_num = 0;
+    for (int i = 0; i < MAX_INODE_NUM; i++)
+        fs->inodes[i] = NULL;
     fs->dev = dev;
 }
 
@@ -76,38 +77,6 @@ static filesystem_t *create_procfs() {
 }
 
 static void create_procinodes() {
-    thread_t *current = thread_head;
-    while (current != NULL){
-        inode_t *new_proc_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
-        if (!new_proc_inode) panic("inode allocation failed");
-
-        new_proc_inode->can_read = 1;
-        new_proc_inode->can_write = 0;
-        new_proc_inode->open_thread_num = 0;
-
-        char pid[10], runnable[10], tf[200];
-        sprintf(pid, "%d", current->tid);
-        sprintf(runnable, "%d", current->runnable);
-        sprintf(tf, "eax: 0x%x; ebx: 0x%x; ecx: 0x%x; edx: 0x%x; esi: 0x%x; edi: 0x%x; ebp: 0x%x; esp3: 0x%x",
-            current->tf->eax, current->tf->ebx, current->tf->ecx, current->tf->edx, current->tf->esi, current->tf->edi, 
-            current->tf->ebp, current->tf->esp3);
-
-        strcpy(new_proc_inode->name, procfs_path.name);
-        strcat(new_proc_inode->name, "/");
-        strcat(new_proc_inode->name, pid);
-        strcat(new_proc_inode->name, "/status");
-        strcpy(new_proc_inode->content, "pid: ");
-        strcat(new_proc_inode->content, pid);
-        strcat(new_proc_inode->content, "\nrunnable: ");
-        strcat(new_proc_inode->content, runnable);
-        strcat(new_proc_inode->content, "\nregs: ");
-        strcat(new_proc_inode->content, tf);
-        strcat(new_proc_inode->content, "\n");
-
-        procfs_path.fs->inodes[procfs_path.fs->inode_num++] = new_proc_inode;
-        current = current->next;
-    }
-
     inode_t *cpuinfo_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
     if (!cpuinfo_inode) panic("inode allocation failed");
     cpuinfo_inode->can_read = 1;
@@ -116,7 +85,18 @@ static void create_procinodes() {
     strcpy(cpuinfo_inode->name, procfs_path.name);
     strcat(cpuinfo_inode->name, "/cpuinfo");
     strcpy(cpuinfo_inode->content, "This is the cpuinfo file.\n");
-    procfs_path.fs->inodes[procfs_path.fs->inode_num++] = cpuinfo_inode;
+    int i;
+    for (i = 0; i < MAX_INODE_NUM; i++){
+        if (procfs_path.fs->inodes[i] == NULL){
+            procfs_path.fs->inodes[i] = cpuinfo_inode;
+            break;
+        }
+    }
+    if (i == MAX_INODE_NUM){
+        Log("The procfs's inode pool is full.");
+        return;
+    }
+    Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
 
     inode_t *meminfo_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
     if (!meminfo_inode) panic("inode allocation failed");
@@ -124,9 +104,19 @@ static void create_procinodes() {
     meminfo_inode->can_write = 0;
     meminfo_inode->open_thread_num = 0;
     strcpy(meminfo_inode->name, procfs_path.name);
-    strcat(meminfo_inode->name, "/cpuinfo");
+    strcat(meminfo_inode->name, "/meminfo");
     strcpy(meminfo_inode->content, "This is the meminfo file.\n");
-    procfs_path.fs->inodes[procfs_path.fs->inode_num++] = meminfo_inode;
+    for (i = 0; i < MAX_INODE_NUM; i++){
+        if (procfs_path.fs->inodes[i] == NULL){
+            procfs_path.fs->inodes[i] = meminfo_inode;
+            break;
+        }
+    }
+    if (i == MAX_INODE_NUM){
+        Log("The procfs's inode pool is full.");
+        return;
+    }
+    Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
 }
 
 static filesystem_t *create_devfs() {

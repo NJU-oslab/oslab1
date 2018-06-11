@@ -19,7 +19,7 @@ static spinlock_t thread_lock;
 static spinlock_t sem_lock;
 
 thread_t * thread_head = NULL;
-
+extern mount_path_t procfs_path;
 
 MOD_DEF(kmt) {
     .init = kmt_init,
@@ -33,6 +33,48 @@ MOD_DEF(kmt) {
     .sem_wait = kmt_sem_wait,
     .sem_signal = kmt_sem_signal,
 };
+
+//changes made by kmt_create to the filesystem /proc/[pid]
+
+static void update_procfs_inodes(thread_t *thread){
+    inode_t *new_proc_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
+    if (!new_proc_inode) panic("inode allocation failed");
+
+    new_proc_inode->can_read = 1;
+    new_proc_inode->can_write = 0;
+    new_proc_inode->open_thread_num = 0;
+
+    char pid[10], runnable[10], tf[200];
+    sprintf(pid, "%d", thread->tid);
+    sprintf(runnable, "%d", thread->runnable);
+    sprintf(tf, "eax: 0x%x; ebx: 0x%x; ecx: 0x%x; edx: 0x%x; esi: 0x%x; edi: 0x%x; ebp: 0x%x; esp3: 0x%x",
+        thread->tf->eax, thread->tf->ebx, thread->tf->ecx, thread->tf->edx, thread->tf->esi, thread->tf->edi, 
+        thread->tf->ebp, thread->tf->esp3);
+
+    strcpy(new_proc_inode->name, procfs_path.name);
+    strcat(new_proc_inode->name, "/");
+    strcat(new_proc_inode->name, pid);
+    strcat(new_proc_inode->name, "/status");
+    strcpy(new_proc_inode->content, "pid: ");
+    strcat(new_proc_inode->content, pid);
+    strcat(new_proc_inode->content, "\nrunnable: ");
+    strcat(new_proc_inode->content, runnable);
+    strcat(new_proc_inode->content, "\nregs: ");
+    strcat(new_proc_inode->content, tf);
+    strcat(new_proc_inode->content, "\n");
+    int i;
+    for (i = 0; i < MAX_INODE_NUM; i++){
+        if (procfs_path.fs->inodes[i] == NULL){
+            procfs_path.fs->inodes[i] = new_proc_inode;
+            break;
+        }
+    }
+    if (i == MAX_INODE_NUM){
+        Log("The procfs's inode pool is full.");
+        return;
+    }
+    Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
+}
 
 static void kmt_init(){
     current_thread = NULL;
@@ -53,6 +95,8 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     thread->waiting_sem = NULL;
     thread->tid = thread_cnt++;
     thread->tf = _make(thread->stack, entry, arg);
+
+    update_procfs_inodes(thread);
 
     thread_t *new_thread = thread;
     if (thread_head == NULL){

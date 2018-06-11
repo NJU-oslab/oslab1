@@ -78,7 +78,7 @@ static Block* allocate_new(size_t size) {
 		new_mem = cur;
 		cur += 2 * size;
 	}
-	Log("new_mem: 0x%x", new_mem);
+//	Log("new_mem: 0x%x", new_mem);
 	new_block = (Block *)new_mem;
 	new_block->body.size = 2 * size;
 	free_unsafe((void*)(new_block + 1));
@@ -99,7 +99,7 @@ static void* malloc_unsafe(size_t size) {
 	current = prev->body.next;
 	while (1) {
 		if (current->body.size >= size) {
-			Log("current->body.size: %d\tsize: %d\n", current->body.size, size);
+//			Log("current->body.size: %d\tsize: %d\n", current->body.size, size);
 			if (current->body.size > size) {
 				current->body.size -= size;
 				current = (Block *)((char *)current + current->body.size);
@@ -135,7 +135,7 @@ static void *pmm_alloc(size_t size){
 	TRACE_ENTRY;
 	kmt->spin_lock(&pmm_lock);
 	void *ret = malloc_unsafe(size);
-	Log("0x%x mod 0x%x = 0x%x", ret, mul, (size_t)ret % mul);
+//	Log("0x%x mod 0x%x = 0x%x", ret, mul, (size_t)ret % mul);
 //	assert((size_t)ret % mul == 0);
 	kmt->spin_unlock(&pmm_lock);
 	TRACE_EXIT;

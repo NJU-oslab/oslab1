@@ -89,3 +89,18 @@ void sem_test() {
   Log("sem_test end.");
 //  printf("sem_test end\n============================");
 }
+
+static thread_t fs_test_thread[5];
+
+static void fs_test_func(void *tid){
+    while (1);
+}
+
+void fs_init_test() {
+  Log("fs_init_test begin");
+  int i;
+  for (i = 0; i < 5; i++){
+    kmt->create(&fs_test_thread[i], fs_test_func, (void *)i);
+    Log("Thread %d created.", i);
+  }
+}
