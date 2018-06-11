@@ -35,6 +35,7 @@ static file_t *file_pool[MAX_FILE_NUM];
 //procfs's implementation
 
 static fsops_t procfs_ops;
+static fsops_t kvfs_ops;
 
 static void fsops_init(struct filesystem *fs, const char *name, inode_t *dev){
     if (name != NULL) {
@@ -64,7 +65,14 @@ static inode_t *fsops_lookup(struct filesystem *fs, const char *path){
         break;
     }
     case DEVFS://TODO:
-    case KVFS://TODO:
+    case KVFS: {
+        for (int i = 0; i < MAX_INODE_NUM; i++){
+            if (fs->inodes[i] != NULL && strcmp(fs->inodes[i]->name, path) == 0){
+                return fs->inodes[i];
+            }
+        }
+        break;
+    }
     default: break;
     }
     return NULL;
@@ -126,14 +134,39 @@ static void create_procinodes() {
  //   Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
 }
 
+static void create_kvinodes(){
+    inode_t *kv_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
+    if (!kv_inode) panic("inode allocation failed");
+    kv_inode->can_read = 1;
+    kv_inode->can_write = 1;
+    kv_inode->open_thread_num = 0;
+    strcpy(kv_inode->name, kvfs_path.name);
+    strcat(kv_inode->name, "/a.txt");
+    int i;
+    for (i = 0; i < MAX_INODE_NUM; i++){
+        if (kvfs_path.fs->inodes[i] == NULL){
+            kvfs_path.fs->inodes[i] = kv_inode;
+            break;
+        }
+    }
+    if (i == MAX_INODE_NUM){
+        Log("The kvfs's inode pool is full.");
+        return;
+    }
+}
+
 static filesystem_t *create_devfs() {
     //TODO:
     return NULL;
 }
 
 static filesystem_t *create_kvfs() {
-    //TODO:
-    return NULL;
+    filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
+    if (!fs) panic("fs allocation failed");
+    fs->ops = &kvfs_ops;
+    fs->ops->init(fs, "kvfs", NULL);
+    vfs->mount("/", fs);
+    return fs;
 }
 
 
@@ -276,6 +309,10 @@ static void oop_func_init(){
     procfs_ops.lookup = &fsops_lookup;
     procfs_ops.close = &fsops_close;
 
+    kvfs_ops.init = &fsops_init;
+    kvfs_ops.lookup = &fsops_lookup;
+    kvfs_ops.close = &fsops_close;
+
     file_ops.open = &fileops_open;
     file_ops.read = &fileops_read;
     file_ops.write = &fileops_write;
@@ -288,6 +325,7 @@ static void fs_init(){
     create_devfs();
     create_kvfs();
     create_procinodes();
+    create_kvinodes();
 }
 
 //vfs API
