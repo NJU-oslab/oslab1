@@ -10,6 +10,12 @@ static ssize_t vfs_write(int fd, void *buf, size_t nbyte);
 static off_t vfs_lseek(int fd, off_t offset, int whence);
 static int vfs_close(int fd);
 
+extern thread_t *thread_head;
+
+static mount_path_t procfs_path;
+static mount_path_t devfs_path;
+static mount_path_t kvfs_path;
+
 MOD_DEF(vfs){
     .init = vfs_init,
     .access = vfs_access,
@@ -41,78 +47,191 @@ static void fsops_init(struct filesystem *fs, const char *name, inode_t *dev){
         else
             Log("a filesystem is created but cannot be identified.");
     }
+    fs->inode_num = 0;
     fs->dev = dev;
 }
 
-static inode_t *fsops_lookup(struct filesystem *fs, const char *path, int flags){
+static inode_t *fsops_lookup_open(struct filesystem *fs, const char *path, int flags){
+    //TODO:
+    return NULL;
+}
+
+static inode_t *fsops_lookup_access(struct filesystem *fs, const char *path, int mode){
+    //TODO:
     return NULL;
 }
 
 static int fsops_close(inode_t *inode){
+    //TODO:
     return 0;
 }
 
 static filesystem_t *create_procfs() {
     filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
-    if (!fs) Log("fs allocation failed");
+    if (!fs) panic("fs allocation failed");
     fs->ops = &procfs_ops;
     fs->ops->init(fs, "procfs", NULL);
     vfs->mount("/proc", fs);
     return fs;
 }
 
+static void create_procinodes() {
+    thread_t *current = thread_head;
+    while (current != NULL){
+        inode_t *new_proc_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
+        if (!new_proc_inode) panic("inode allocation failed");
+
+        new_proc_inode->can_read = 1;
+        new_proc_inode->can_write = 0;
+        new_proc_inode->open_thread_num = 0;
+
+        char pid[10], runnable[10], tf[200];
+        sprintf(pid, "%d", current->tid);
+        sprintf(runnable, "%d", current->runnable);
+        sprintf(tf, "eax: 0x%x; ebx: 0x%x; ecx: 0x%x; edx: 0x%x; esi: 0x%x; edi: 0x%x; ebp: 0x%x; esp3: 0x%x",
+            current->tf->eax, current->tf->ebx, current->tf->ecx, current->tf->edx, current->tf->esi, current->tf->edi, 
+            current->tf->ebp, current->tf->esp3);
+
+        strcpy(new_proc_inode->name, procfs_path.name);
+        strcat(new_proc_inode->name, "/");
+        strcat(new_proc_inode->name, pid);
+        strcat(new_proc_inode->name, "/status");
+        strcpy(new_proc_inode->content, "pid: ");
+        strcat(new_proc_inode->content, pid);
+        strcat(new_proc_inode->content, "\nrunnable: ");
+        strcat(new_proc_inode->content, runnable);
+        strcat(new_proc_inode->content, "\nregs: ");
+        strcat(new_proc_inode->content, tf);
+        strcat(new_proc_inode->content, "\n");
+
+        procfs_path.fs->inodes[procfs_path.fs->inode_num++] = new_proc_inode;
+        current = current->next;
+    }
+
+    inode_t *cpuinfo_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
+    if (!cpuinfo_inode) panic("inode allocation failed");
+    cpuinfo_inode->can_read = 1;
+    cpuinfo_inode->can_write = 0;
+    cpuinfo_inode->open_thread_num = 0;
+    strcpy(cpuinfo_inode->name, procfs_path.name);
+    strcat(cpuinfo_inode->name, "/cpuinfo");
+    strcpy(cpuinfo_inode->content, "This is the cpuinfo file.\n");
+    procfs_path.fs->inodes[procfs_path.fs->inode_num++] = cpuinfo_inode;
+
+    inode_t *meminfo_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
+    if (!meminfo_inode) panic("inode allocation failed");
+    meminfo_inode->can_read = 1;
+    meminfo_inode->can_write = 0;
+    meminfo_inode->open_thread_num = 0;
+    strcpy(meminfo_inode->name, procfs_path.name);
+    strcat(meminfo_inode->name, "/cpuinfo");
+    strcpy(meminfo_inode->content, "This is the meminfo file.\n");
+    procfs_path.fs->inodes[procfs_path.fs->inode_num++] = meminfo_inode;
+}
+
+static filesystem_t *create_devfs() {
+    //TODO:
+    return NULL;
+}
+
+static filesystem_t *create_kvfs() {
+    //TODO:
+    return NULL;
+}
+
+
 //file's implementation
 
 static fileops_t file_ops;
 
 static int fileops_open(inode_t *inode, file_t *file, int flags){
+    //TODO:
     return 0;
 }
 
 static ssize_t fileops_read(inode_t *inode, file_t *file, char *buf, size_t size){
+    //TODO:
     return 0;
 }
 
 static ssize_t fileops_write(inode_t *inode, file_t *file, const char *buf, size_t size){
+    //TODO:
     return 0;
 }
 
 static off_t fileops_lseek(inode_t *inode, file_t *file, off_t offset, int whence){
+    //TODO:
     return 0;
 }
 
-//vfs API
+static int fileops_close(inode_t *inode, file_t *file){
+    //TODO:
+    return 0;
+}
 
-static mount_path_t procfs_path;
-static mount_path_t devfs_path;
-static mount_path_t kvfs_path;
+//other helper functions
 
-static void vfs_init(){
+static int search_for_file_index(int fd){
+    int i;
+    for (i = 0; i < MAX_FILE_NUM; i++){
+        if (file_pool[i]->fd == fd){
+            break;
+        }
+    }
+    if (i == MAX_FILE_NUM){
+        Log("Cannot find the fd, so lseek failed.");
+        return -1;
+    }
+    return i;
+}
+
+// vfs initialization helper functions
+
+static void pool_init(){
     memset(fd_pool, 0, sizeof(fd_pool));
     fd_pool[0] = fd_pool[1] = fd_pool[2] = 1;
+    for (int i = 0; i < MAX_FILE_NUM; i++)
+        file_pool[i] = NULL;
+}
+
+static void oop_func_init(){
     procfs_ops.init = &fsops_init;
-    procfs_ops.lookup = &fsops_lookup;
+    procfs_ops.lookup_open = &fsops_lookup_open;
+    procfs_ops.lookup_access = &fsops_lookup_access;
     procfs_ops.close = &fsops_close;
-    strcpy(procfs_path.name, "/proc");
-    strcpy(devfs_path.name, "/dev");
-    strcpy(kvfs_path.name, "/");
+
     file_ops.open = &fileops_open;
     file_ops.read = &fileops_read;
     file_ops.write = &fileops_write;
     file_ops.lseek = &fileops_lseek;
+    file_ops.close = &fileops_close;
+}
+
+static void fs_init(){
     create_procfs();
+    create_devfs();
+    create_kvfs();
+    create_procinodes();
+}
+
+//vfs API
+
+static void vfs_init(){
+    pool_init();
+    oop_func_init();
+    fs_init();
 }
 
 static int vfs_access(const char *path, int mode){
     inode_t *open_inode = NULL;
-    if (strncmp("/proc", path, 5) == 0){
-        open_inode = procfs_path.fs->ops->lookup(procfs_path.fs, path, mode);
+    if (strncmp(procfs_path.name, path, strlen(procfs_path.name)) == 0){
+        open_inode = procfs_path.fs->ops->lookup_access(procfs_path.fs, path, mode);
     }
-    else if (strncmp("/dev", path, 4) == 0){
-        open_inode = devfs_path.fs->ops->lookup(devfs_path.fs, path, mode);
+    else if (strncmp(devfs_path.name, path, strlen(devfs_path.name)) == 0){
+        open_inode = devfs_path.fs->ops->lookup_access(devfs_path.fs, path, mode);
     }
-    else if (strncmp("/", path, 1) == 0){
-        open_inode = kvfs_path.fs->ops->lookup(kvfs_path.fs, path, mode);
+    else if (strncmp(kvfs_path.name, path, strlen(kvfs_path.name)) == 0){
+        open_inode = kvfs_path.fs->ops->lookup_access(kvfs_path.fs, path, mode);
     }
     else{
         Log("Cannot find the path.");
@@ -136,9 +255,9 @@ static int vfs_access(const char *path, int mode){
 
 static int vfs_mount(const char *path, filesystem_t *fs){
     switch (fs->fs_type){
-    case PROCFS: procfs_path.fs = fs; fs->path = &procfs_path; break;
-    case DEVFS: devfs_path.fs = fs; fs->path = &devfs_path; break;
-    case KVFS: kvfs_path.fs = fs; fs->path = &kvfs_path; break;
+    case PROCFS: procfs_path.fs = fs; fs->path = &procfs_path; strcpy(procfs_path.name, path); break;
+    case DEVFS: devfs_path.fs = fs; fs->path = &devfs_path; strcpy(devfs_path.name, path); break;
+    case KVFS: kvfs_path.fs = fs; fs->path = &kvfs_path; strcpy(kvfs_path.name, path); break;
     default: break;
     }
     return 0;
@@ -147,26 +266,29 @@ static int vfs_mount(const char *path, filesystem_t *fs){
 static int vfs_unmount(const char *path){
     if (strcmp(path, procfs_path.name) == 0){
         procfs_path.fs = NULL;
+        procfs_path.fs->path = NULL;
     }
     else if (strcmp(path, devfs_path.name) == 0){
         devfs_path.fs = NULL;
+        devfs_path.fs->path = NULL;
     }
     else if (strcmp(path, kvfs_path.name) == 0){
         kvfs_path.fs = NULL;
+        kvfs_path.fs->path = NULL;
     }
     return 0;
 }
 
 static int vfs_open(const char *path, int flags){
     inode_t *open_inode = NULL;
-    if (strncmp("/proc", path, 5) == 0){
-        open_inode = procfs_path.fs->ops->lookup(procfs_path.fs, path, flags);
+    if (strncmp(procfs_path.name, path, strlen(procfs_path.name)) == 0){
+        open_inode = procfs_path.fs->ops->lookup_open(procfs_path.fs, path, flags);
     }
-    else if (strncmp("/dev", path, 4) == 0){
-        open_inode = devfs_path.fs->ops->lookup(devfs_path.fs, path, flags);
+    else if (strncmp(devfs_path.name, path, strlen(devfs_path.name)) == 0){
+        open_inode = devfs_path.fs->ops->lookup_open(devfs_path.fs, path, flags);
     }
-    else if (strncmp("/", path, 1) == 0){
-        open_inode = kvfs_path.fs->ops->lookup(kvfs_path.fs, path, flags);
+    else if (strncmp(kvfs_path.name, path, strlen(kvfs_path.name)) == 0){
+        open_inode = kvfs_path.fs->ops->lookup_open(kvfs_path.fs, path, flags);
     }
     else{
         Log("Cannot find the path.");
@@ -177,7 +299,7 @@ static int vfs_open(const char *path, int flags){
         int ret_fd = -1;
         file_t *f = (file_t *)pmm->alloc(sizeof(file_t));
         if (!f) {
-            Log("file allocation failed");
+            panic("file allocation failed");
             return -1;
         }
         f->ops = &file_ops;
@@ -206,59 +328,25 @@ static int vfs_open(const char *path, int flags){
 }
 
 static ssize_t vfs_read(int fd, void *buf, size_t nbyte){
-    int i;
-    for (i = 0; i < MAX_FILE_NUM; i++){
-        if (file_pool[i]->fd == fd){
-            break;
-        }
-    }
-    if (i == MAX_FILE_NUM){
-        Log("Cannot find the fd, so read failed.");
-        return -1;
-    }
-    return file_pool[i]->ops->read(file_pool[i]->f_inode, file_pool[i], buf, nbyte);
+    int file_index = search_for_file_index(fd);
+    if (file_index == -1) return -1;
+    return file_pool[file_index]->ops->read(file_pool[file_index]->f_inode, file_pool[file_index], buf, nbyte);
 }
 
 static ssize_t vfs_write(int fd, void *buf, size_t nbyte){
-    int i;
-    for (i = 0; i < MAX_FILE_NUM; i++){
-        if (file_pool[i]->fd == fd){
-            break;
-        }
-    }
-    if (i == MAX_FILE_NUM){
-        Log("Cannot find the fd, so write failed.");
-        return -1;
-    }
-    return file_pool[i]->ops->write(file_pool[i]->f_inode, file_pool[i], buf, nbyte);
+    int file_index = search_for_file_index(fd);
+    if (file_index == -1) return -1;
+    return file_pool[file_index]->ops->write(file_pool[file_index]->f_inode, file_pool[file_index], buf, nbyte);
 }
 
 static off_t vfs_lseek(int fd, off_t offset, int whence){
-    int i;
-    for (i = 0; i < MAX_FILE_NUM; i++){
-        if (file_pool[i]->fd == fd){
-            break;
-        }
-    }
-    if (i == MAX_FILE_NUM){
-        Log("Cannot find the fd, so lseek failed.");
-        return -1;
-    }
-    return file_pool[i]->ops->lseek(file_pool[i]->f_inode, file_pool[i], offset, whence);
+    int file_index = search_for_file_index(fd);
+    if (file_index == -1) return -1;
+    return file_pool[file_index]->ops->lseek(file_pool[file_index]->f_inode, file_pool[file_index], offset, whence);
 }
 
 static int vfs_close(int fd){
-    int i;
-    for (i = 0; i < MAX_FILE_NUM; i++){
-        if (file_pool[i]->fd == fd){
-            break;
-        }
-    }
-    if (i == MAX_FILE_NUM){
-        Log("Cannot find the fd, so write failed.");
-        return -1;
-    }
-    pmm->free(file_pool[i]);
-    file_pool[i] = NULL;
-    return 0;
+    int file_index = search_for_file_index(fd);
+    if (file_index == -1) return -1;
+    return file_pool[file_index]->ops->close(file_pool[file_index]->f_inode, file_pool[file_index]);
 }

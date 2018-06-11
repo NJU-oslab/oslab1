@@ -1,5 +1,4 @@
 #include <os.h>
-#include "libc.h"
 
 static void kmt_init();
 static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg);
@@ -15,10 +14,12 @@ static void kmt_sem_signal(sem_t *sem);
 static int spin_cnt = 0;
 static int intr_ready = 0;
 static thread_t * current_thread = NULL;
-static thread_t * head = NULL;
 static int thread_cnt = 0;
 static spinlock_t thread_lock;
 static spinlock_t sem_lock;
+
+thread_t * thread_head = NULL;
+
 
 MOD_DEF(kmt) {
     .init = kmt_init,
@@ -35,7 +36,7 @@ MOD_DEF(kmt) {
 
 static void kmt_init(){
     current_thread = NULL;
-    head = NULL;
+    thread_head = NULL;
     thread_cnt = 0;
     kmt_spin_init(&thread_lock, "thread_lock");
     kmt_spin_init(&sem_lock, "sem_lock");
@@ -54,13 +55,13 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     thread->tf = _make(thread->stack, entry, arg);
 
     thread_t *new_thread = thread;
-    if (head == NULL){
+    if (thread_head == NULL){
         new_thread->next = NULL;
-        head = new_thread;
+        thread_head = new_thread;
     }
     else{
-        new_thread->next = head;
-        head = new_thread;
+        new_thread->next = thread_head;
+        thread_head = new_thread;
     }
     
     Log("entry: 0x%x\targ: %d", entry, arg);
@@ -69,7 +70,7 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
     /* print threads' information
     Log("------------------------------------------");
     Log("Now, the thread information is as follows.");
-    thread_t *cur = head;
+    thread_t *cur = thread_head;
     while (cur != NULL){
         Log("thread %d: runnbale: %d", cur->tid, cur->runnable);
         cur = cur->next;
@@ -82,15 +83,15 @@ static int kmt_create(thread_t *thread, void (*entry)(void *arg), void *arg){
 }
 static void kmt_teardown(thread_t *thread){
     kmt_spin_lock(&thread_lock);
-    thread_t *cur = head;
+    thread_t *cur = thread_head;
     int find_flag = 0;
     if (cur == NULL){
         Log("There's no thread that can be recycled.");
         assert(0);
     }
     else if (cur == thread){
-        pmm->free(head->stack.start);
-        head = cur->next;
+        pmm->free(thread_head->stack.start);
+        thread_head = cur->next;
         find_flag = 1;
     }
     else {
@@ -112,7 +113,7 @@ static void kmt_teardown(thread_t *thread){
     /* print threads' information
     Log("------------------------------------------");
     Log("Now, the thread information is as follows.");
-    thread_t *curr = head;
+    thread_t *curr = thread_head;
     while (curr != NULL){
         Log("thread %d: runnbale: %d", curr->tid, curr->runnable);
         curr = curr->next;
@@ -124,10 +125,10 @@ static void kmt_teardown(thread_t *thread){
 static thread_t *kmt_schedule(){
 //    Log("Now, thread is %d", current_thread->tid);
     if (current_thread == NULL)
-        current_thread = head;
+        current_thread = thread_head;
     thread_t *next_thread = current_thread;
     if (current_thread->next == NULL)
-        next_thread = head;
+        next_thread = thread_head;
     else
         next_thread = current_thread->next;
     while (1){
@@ -136,7 +137,7 @@ static thread_t *kmt_schedule(){
         if (next_thread->next != NULL)
             next_thread = next_thread->next;
         else
-            next_thread = head;
+            next_thread = thread_head;
     }
     current_thread = next_thread;
     return next_thread;
@@ -193,7 +194,7 @@ static void kmt_sem_wait(sem_t *sem){
 
 static void kmt_sem_signal(sem_t *sem){
     kmt_spin_lock(&sem_lock);
-    thread_t *cur = head;
+    thread_t *cur = thread_head;
     sem->count++;
     Log("%s: sem_count: 0x%x",sem->name, sem->count);
     while (cur != NULL){

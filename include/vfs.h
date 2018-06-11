@@ -5,6 +5,7 @@
 #define MAX_FD_NUM 4096
 #define MAX_PATH_LEN 128
 #define MAX_FILE_NUM 512
+#define MAX_INODE_NUM 512
 
 typedef struct fsops fsops_t;
 typedef struct fileops fileops_t;
@@ -23,7 +24,8 @@ enum fstype{
 
 struct fsops {
     void (*init)(filesystem_t *fs, const char *name, inode_t *dev);
-    inode_t *(*lookup)(filesystem_t *fs, const char *path, int flags);
+    inode_t *(*lookup_open)(filesystem_t *fs, const char *path, int flags);
+    inode_t *(*lookup_access)(filesystem_t *fs, const char *path, int mode);
     int (*close)(inode_t *inode);
 };
 
@@ -32,6 +34,7 @@ struct fileops {
     ssize_t (*read)(inode_t *inode, file_t *file, char *buf, size_t size);
     ssize_t (*write)(inode_t *inode, file_t *file, const char *buf, size_t size);
     off_t (*lseek)(inode_t *inode, file_t *file, off_t offset, int whence);
+    int (*close)(inode_t *inode, file_t *file);
 };
 
 struct file{
@@ -41,6 +44,8 @@ struct file{
     inode_t *f_inode;
     int open_offset;
     int fd;
+    char can_read;
+    char can_write;
 };
 
 struct inode{
@@ -57,6 +62,8 @@ struct filesystem{
     fsops_t *ops;
     int fs_type;
     inode_t *dev;
+    inode_t *inodes[MAX_INODE_NUM];
+    int inode_num;
 };
 
 struct mount_path{

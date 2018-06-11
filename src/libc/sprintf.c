@@ -172,7 +172,7 @@ int sprintf(char *out, const char *fmt, ...) {
 	  }
 	  ret += sub_len;
 	}
-	printf("when *fmt = %c, *out = %c\n", *(fmt-1), *(out-1));
+//	printf("when *fmt = %c, *out = %c\n", *(fmt-1), *(out-1));
   }
   return ret;
 }
