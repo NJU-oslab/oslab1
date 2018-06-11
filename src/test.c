@@ -112,6 +112,7 @@ void fs_init_test() {
   if (fd == -1){
     panic("open failed.\n");
   }
+  assert(vfs->access("/proc/1/status", W_OK) == -1);
   char buf[200];
   if (vfs->read(fd, buf, sizeof(buf) - 1) == -1)
     panic("read failed");
@@ -122,4 +123,8 @@ void fs_init_test() {
     panic("read failed");
   printf("buf------\n%s\n", buf);
   vfs->close(fd);
+  assert(vfs->access("/proc/1/status", F_OK) == 0);
+  assert(vfs->access("/proc/1/status", R_OK) == 0);
+  assert(vfs->access("/proc/1/status", W_OK) == 0);
+  assert(vfs->access("/proc/1/status", X_OK) == -1);
 }
