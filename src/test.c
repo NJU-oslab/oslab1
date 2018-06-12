@@ -231,7 +231,17 @@ static void mount_test(){
 }
 
 static void multiopen_test(){
- 
+  TestLog("multiopen_test begins...");
+  int fd1, fd2, fd3;
+  fd1 = vfs->open("/a.txt", O_RDONLY);
+  assert(fd1 != -1);
+  fd2 = vfs->open("/a.txt", O_RDWR);
+  assert(fd2 != -1);
+  fd3 = vfs->open("/a.txt", O_WRONLY);
+  assert(fd3 == -1);
+  vfs->close(fd1);
+  vfs->close(fd2);
+  TestLog("multiopen_test passed.");
 }
 
 static void error_processing_test(){
