@@ -35,7 +35,7 @@ MOD_DEF(kmt) {
 };
 
 //changes made by kmt_create to the filesystem /proc/[pid]
-/*
+
 static void update_procfs(thread_t *thread){
     char pid[10], runnable[10], tf[200];
     sprintf(pid, "%d", thread->tid);
@@ -50,7 +50,7 @@ static void update_procfs(thread_t *thread){
     strcat(thread->inode->content, "\nregs: ");
     strcat(thread->inode->content, tf);
     strcat(thread->inode->content, "\n");
-}*/
+}
 
 static void add_procfs_inodes(thread_t *thread){
     inode_t *new_proc_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
@@ -91,6 +91,7 @@ static void add_procfs_inodes(thread_t *thread){
         Log("The procfs's inode pool is full.");
         return;
     }
+    thread->inode = new_proc_inode;
  //   Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
 }
 
@@ -213,7 +214,7 @@ static thread_t *kmt_schedule(){
         else
             next_thread = thread_head;
     }
-//    update_procfs(next_thread);
+    update_procfs(next_thread);
     current_thread = next_thread;
     return next_thread;
 }
