@@ -1,20 +1,26 @@
 #include "os.h"
 
 extern void print_proc_inodes();
+static void procfs_test();
+static void devfs_test();
+static void kvfs_test();
+static void mount_test();
+static void error_processing_test();
+static void multithread_test();
 
 void alloc_test() {
-  Log("alloc_test begin...");
-  Log("intr_status: %d", _intr_read());
+  TestLog("alloc_test begin...");
+  TestLog("intr_status: %d", _intr_read());
   int *arr = (int*)pmm->alloc(20 * sizeof(int));
-  Log("intr_status: %d", _intr_read());
+  TestLog("intr_status: %d", _intr_read());
   for (int i = 0; i < 20; i++){
     arr[i] = i;
   }
   for (int i = 0; i < 20; i++){
-    Log("arr[%d]: %d", i, arr[i]);
+    TestLog("arr[%d]: %d", i, arr[i]);
   }
   pmm->free(arr);
-  Log("intr_status: %d", _intr_read());
+  TestLog("intr_status: %d", _intr_read());
   pmm->alloc(16);
   pmm->alloc(20);
   pmm->alloc(24);
@@ -31,9 +37,9 @@ void alloc_test() {
   pmm->alloc(120);
   pmm->alloc(120);
   pmm->alloc(120);
-  Log("intr_status: %d", _intr_read());
-  Log("_heap.end: 0x%x", _heap.end);
-  Log("alloc_test end.\n============================");
+  TestLog("intr_status: %d", _intr_read());
+  TestLog("_heap.end: 0x%x", _heap.end);
+  TestLog("alloc_test end.\n============================");
 }
 
 static thread_t test_thread[5];
@@ -42,24 +48,24 @@ static void thread_test_func(void *tid){
     TRACE_ENTRY;
     int cnt;
     for (cnt = 0; cnt < 10; cnt++){
-        Log("The %d thread prints: %d", (int)tid, cnt);
+        TestLog("The %d thread prints: %d", (int)tid, cnt);
     }
-    Log("The %d thread is finished.", (int)tid);
+    TestLog("The %d thread is finished.", (int)tid);
     while (1);
 }
 
 void thread_test() {
-  Log("thread_test begin...");   
+  TestLog("thread_test begin...");   
   int i;
   for (i = 0; i < 5; i++){
     kmt->create(&test_thread[i], thread_test_func, (void *)i);
-    Log("Thread %d created.", i);
+    TestLog("Thread %d created.", i);
   }
 /*  kmt->teardown(&test_thread[2]);
-  Log("Thread 2 has been teardowned.");
+  TestLog("Thread 2 has been teardowned.");
   kmt->teardown(&test_thread[4]);
-  Log("THread 4 has been teardowned.");*/
-  Log("thread_test end\n============================");
+  TestLog("THread 4 has been teardowned.");*/
+  TestLog("thread_test end\n============================");
 }
 
 static sem_t empty;
@@ -83,12 +89,12 @@ static void consumer(void *arg) {
 }
 
 void sem_test() {
-  Log("sem_test begin");
+  TestLog("sem_test begin");
   kmt->sem_init(&empty, "empty", 20);
   kmt->sem_init(&fill, "fill", 0);
   kmt->create(&sem_test_thread[0], producer, NULL);
   kmt->create(&sem_test_thread[1], consumer, NULL);
-  Log("sem_test end.");
+  TestLog("sem_test end.");
 //  printf("sem_test end\n============================");
 }
 
@@ -121,15 +127,15 @@ static int random_number(int min, int max)
 	return min + ( random_value % ( max - min + 1 ));
 }
 
-void fs_init_test() {
-  Log("fs_init_test begin");
+static void procfs_test(){
+  TestLog("procfs_test begins...");
   int i;
   for (i = 0; i < 5; i++){
     kmt->create(&fs_test_thread[i], fs_test_func, (void *)i);
-    Log("Thread %d created.", i);
+    TestLog("Thread %d created.", i);
   }
   kmt->teardown(&fs_test_thread[2]);
-  Log("Thread 2 deleted.");
+  TestLog("Thread 2 deleted.");
   print_proc_inodes();
   int fd = vfs->open("/proc/1/status", O_RDWR);
   if (fd == -1){
@@ -145,13 +151,32 @@ void fs_init_test() {
   if (vfs->read(fd, buf, sizeof(buf) - 1) == -1)
     panic("read failed");
   printf("buf------\n%s\n", buf);
+  assert(strcmp(buf, "1234") == 0);
   vfs->close(fd);
   assert(vfs->access("/proc/1/status", F_OK) == 0);
   assert(vfs->access("/proc/1/status", R_OK) == 0);
   assert(vfs->access("/proc/1/status", W_OK) == 0);
   assert(vfs->access("/proc/1/status", X_OK) == -1);
+  TestLog("procfs_test end.");
+}
 
-  
+static void devfs_test(){
+  TestLog("devfs_test begins...");
+  int test = 5, ret;
+  char buf[10];
+	while(test--){
+    ret = random_number(1, 10);
+    assert(ret >= 1 && ret <= 10);
+    printf("%d ", ret);
+  }
+  printf("\n");
+  int fd = vfs->open("/dev/null", O_RDONLY);
+  assert(fd == 0);
+  assert(vfs->read(fd, buf, sizeof(buf)) == -1);
+  TestLog("devfs_test ends.");
+}
+
+static void kvfs_test(){
   fd = vfs->open("/a.txt", O_RDWR);
   if (fd == -1){
     panic("open failed.\n");
@@ -167,10 +192,29 @@ void fs_init_test() {
   assert(vfs->access("/a.txt", R_OK) == 0);
   assert(vfs->access("/a.txt", W_OK) == 0);
   assert(vfs->access("/a.txt", X_OK) == -1);
+}
 
-  int test = 5;
-	while(test--)
-    printf("%d\n", random_number(1,10));
+static void mount_test(){
 
-  Log("fs_init_test end");
+}
+
+static void multithread_test(){
+
+}
+
+static void error_processing_test(){
+  
+}
+
+void fs_test() {
+  TestLog("fs_test begin...");
+  procfs_test();
+  devfs_test();
+  kvfs_test();
+  mount_test();
+  multithread_test();
+  error_processing_test();
+
+
+  TestLog("fs_init_test end");
 }
