@@ -311,7 +311,7 @@ static int search_for_file_index(int fd){
         }
     }
     if (i == MAX_FILE_NUM){
-        printf("Cannot find the fd, so lseek failed.\n");
+        printf("Cannot find the fd.\n");
         return -1;
     }
     return i;
