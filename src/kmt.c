@@ -86,9 +86,7 @@ static void update_procfs_inode(thread_t *thread){
     sprintf(tf, "eax: 0x%x; ebx: 0x%x; ecx: 0x%x; edx: 0x%x; esi: 0x%x; edi: 0x%x; ebp: 0x%x; esp3: 0x%x",
         thread->tf->eax, thread->tf->ebx, thread->tf->ecx, thread->tf->edx, thread->tf->esi, thread->tf->edi, 
         thread->tf->ebp, thread->tf->esp3);
-    printf("eax: 0x%x; ebx: 0x%x; ecx: 0x%x; edx: 0x%x; esi: 0x%x; edi: 0x%x; ebp: 0x%x; esp3: 0x%x",
-        thread->tf->eax, thread->tf->ebx, thread->tf->ecx, thread->tf->edx, thread->tf->esi, thread->tf->edi, 
-        thread->tf->ebp, thread->tf->esp3);
+
     strcpy(name, procfs_path.name);
     strcat(name, "/");
     strcat(name, pid);
@@ -100,7 +98,7 @@ static void update_procfs_inode(thread_t *thread){
     strcat(content, "\nregs: ");
     strcat(content, tf);
     strcat(content, "\n");
-
+    printf("%s\n", name);
     int fd = vfs->open(name, O_RDWR);
     vfs->write(fd, content, sizeof(content));
     vfs->close(fd);
