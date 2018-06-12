@@ -101,7 +101,6 @@ static void fsops_init(struct filesystem *fs, const char *name){
 
 static inode_t *fsops_lookup(struct filesystem *fs, const char *path){
     TRACE_ENTRY;
-    printf("f\n");
     for (int i = 0; i < MAX_INODE_NUM; i++){
         if (fs->inodes[i] != NULL && strcmp(fs->inodes[i]->name, path) == 0){
             TRACE_EXIT;

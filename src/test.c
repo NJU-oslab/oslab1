@@ -203,6 +203,7 @@ static void mount_test(){
   filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
   if (!fs) panic("fs allocation failed");
   fs->fs_type = KVFS;
+  fs->ops = &kvfs_ops;
   vfs->mount("/", fs);
   printf("1\n");
   assert(vfs->open("/a.txt", O_RDONLY) == -1);
