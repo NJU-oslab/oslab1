@@ -98,6 +98,7 @@ static void update_procfs_inode(thread_t *thread){
     strcat(content, "\nregs: ");
     strcat(content, tf);
     strcat(content, "\n");
+
     int fd = vfs->open(name, O_RDWR);
     vfs->write(fd, content, sizeof(content));
     vfs->close(fd);
@@ -222,7 +223,6 @@ static thread_t *kmt_schedule(){
         else
             next_thread = thread_head;
     }
-    if (next_thread != NULL)
         update_procfs_inode(next_thread);
     current_thread = next_thread;
     return next_thread;
