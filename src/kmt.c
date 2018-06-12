@@ -35,7 +35,7 @@ MOD_DEF(kmt) {
 };
 
 //changes made by kmt_create to the filesystem /proc/[pid]
-
+/*
 static void update_procfs(thread_t *thread){
     char pid[10], runnable[10], tf[200];
     sprintf(pid, "%d", thread->tid);
@@ -50,7 +50,7 @@ static void update_procfs(thread_t *thread){
     strcat(thread->inode->content, "\nregs: ");
     strcat(thread->inode->content, tf);
     strcat(thread->inode->content, "\n");
-}
+}*/
 
 static void add_procfs_inodes(thread_t *thread){
     inode_t *new_proc_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
