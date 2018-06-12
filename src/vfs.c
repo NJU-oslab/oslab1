@@ -482,6 +482,7 @@ static int vfs_mount(const char *path, filesystem_t *fs){
 
 static int vfs_unmount(const char *path){
     kmt->spin_lock(&fs_lock);
+    printf("fuck.\n");
     if (strcmp(path, procfs_path.name) == 0){
         unmount_fs(&procfs_path);
     }
@@ -489,7 +490,6 @@ static int vfs_unmount(const char *path){
         unmount_fs(&devfs_path);
     }
     else if (strcmp(path, kvfs_path.name) == 0){
-        printf("fuck.\n");
         unmount_fs(&kvfs_path);
     }
     kmt->spin_unlock(&fs_lock);
