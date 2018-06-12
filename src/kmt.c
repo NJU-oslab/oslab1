@@ -36,6 +36,22 @@ MOD_DEF(kmt) {
 
 //changes made by kmt_create to the filesystem /proc/[pid]
 
+static void update_procfs(thread_t *thread){
+    char pid[10], runnable[10], tf[200];
+    sprintf(pid, "%d", thread->tid);
+    sprintf(runnable, "%d", thread->runnable);
+    sprintf(tf, "eax: 0x%x; ebx: 0x%x; ecx: 0x%x; edx: 0x%x; esi: 0x%x; edi: 0x%x; ebp: 0x%x; esp3: 0x%x",
+        thread->tf->eax, thread->tf->ebx, thread->tf->ecx, thread->tf->edx, thread->tf->esi, thread->tf->edi, 
+        thread->tf->ebp, thread->tf->esp3);
+    strcpy(thread->inode->content, "pid: ");
+    strcat(thread->inode->content, pid);
+    strcat(thread->inode->content, "\nrunnable: ");
+    strcat(thread->inode->content, runnable);
+    strcat(thread->inode->content, "\nregs: ");
+    strcat(thread->inode->content, tf);
+    strcat(thread->inode->content, "\n");
+}
+
 static void add_procfs_inodes(thread_t *thread){
     inode_t *new_proc_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
     if (!new_proc_inode) panic("inode allocation failed");
@@ -75,6 +91,7 @@ static void add_procfs_inodes(thread_t *thread){
         Log("The procfs's inode pool is full.");
         return;
     }
+    thread->inode = new_proc_inode;
  //   Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
 }
 
@@ -197,6 +214,7 @@ static thread_t *kmt_schedule(){
         else
             next_thread = thread_head;
     }
+    update_procfs(next_thread);
     current_thread = next_thread;
     return next_thread;
 }
