@@ -23,6 +23,7 @@ extern mount_path_t procfs_path;
 
 extern ssize_t vfs_write_for_kmt(int fd, void *buf, size_t nbyte);
 extern int vfs_open_for_kmt(const char *path, int flags);
+extern int vfs_close_for_kmt(int fd);
 
 MOD_DEF(kmt) {
     .init = kmt_init,
@@ -104,7 +105,7 @@ static void update_procfs_inode(thread_t *thread){
 
     int fd = vfs_open_for_kmt(name, O_RDWR);
     vfs_write_for_kmt(fd, content, sizeof(content));
-    vfs->close(fd);
+    vfs_close_for_kmt(fd);
 }
 
 static void kmt_init(){

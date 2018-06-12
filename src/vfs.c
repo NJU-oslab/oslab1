@@ -646,6 +646,18 @@ static off_t vfs_lseek(int fd, off_t offset, int whence){
     return ret;
 }
 
+int vfs_close_for_kmt(int fd){
+    kmt->spin_lock(&fs_lock);
+    int file_index = search_for_file_index(fd);
+    if (file_index == -1) {
+        kmt->spin_unlock(&fs_lock);
+        return -1;
+    }
+    int ret =  file_pool[file_index]->ops->close(file_pool[file_index]->f_inode, file_pool[file_index]);
+    kmt->spin_unlock(&fs_lock);
+    return ret;
+}
+
 static int vfs_close(int fd){
     kmt->spin_lock(&fs_lock);
     int file_index = search_for_file_index(fd);
