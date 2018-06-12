@@ -214,7 +214,7 @@ static thread_t *kmt_schedule(){
         else
             next_thread = thread_head;
     }
-    update_procfs(next_thread);
+//    update_procfs(next_thread);
     current_thread = next_thread;
     return next_thread;
 }
