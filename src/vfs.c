@@ -565,6 +565,16 @@ static ssize_t vfs_read(int fd, void *buf, size_t nbyte){
     return ret;
 }
 
+ssize_t vfs_write_for_kmt(int fd, void *buf, size_t nbyte){
+    int file_index = search_for_file_index(fd);
+    if (file_index == -1){
+        kmt->spin_unlock(&fs_lock);
+        return -1;
+    }
+    ssize_t ret = file_pool[file_index]->ops->write(file_pool[file_index]->f_inode, file_pool[file_index], buf, nbyte);
+    return ret;
+}
+
 static ssize_t vfs_write(int fd, void *buf, size_t nbyte){
     kmt->spin_lock(&fs_lock);
     int file_index = search_for_file_index(fd);

@@ -20,6 +20,7 @@ static spinlock_t sem_lock;
 
 thread_t * thread_head = NULL;
 extern mount_path_t procfs_path;
+extern ssize_t vfs_write_for_kmt(int fd, void *buf, size_t nbyte);
 
 MOD_DEF(kmt) {
     .init = kmt_init,
@@ -100,8 +101,7 @@ static void update_procfs_inode(thread_t *thread){
     strcat(content, "\n");
 
     int fd = vfs->open(name, O_RDWR);
-    vfs->write(fd, content, sizeof(content));
-    printf("2333\n");
+    vfs_write_for_kmt(fd, content, sizeof(content));
     vfs->close(fd);
 }
 
