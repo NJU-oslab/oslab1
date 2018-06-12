@@ -174,6 +174,10 @@ static void devfs_test(){
   printf("\n");
   int fd = vfs->open("/dev/null", O_RDONLY);
   assert(vfs->read(fd, buf, sizeof(buf)) == -1);
+  fd = vfs->open("/dev/zero", O_RDONLY);
+  int size = vfs->read(fd, buf, sizeof(buf));
+  for (int i = 0; i < 10; i++)
+    assert(buf[i] == 0);
   TestLog("devfs_test passed.");
 }
 
@@ -216,7 +220,7 @@ static void mount_test(){
 
   vfs->unmount("/");
   assert(vfs->open("/a.txt", O_RDONLY) == -1);
-  
+
   vfs->unmount("/");
   assert(vfs->open("/a.txt", O_RDONLY) != -1);
   TestLog("unmount_test passed.");
