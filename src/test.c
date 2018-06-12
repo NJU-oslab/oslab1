@@ -8,7 +8,7 @@ static void mount_test();
 static void error_processing_test();
 static void multithread_test();
 
-extern fsops_t procfs_ops;
+extern fsops_t kvfs_ops;
 
 void alloc_test() {
   TestLog("alloc_test begin...");
@@ -202,10 +202,11 @@ static void mount_test(){
   TestLog("mount_test begins...");
   filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
   if (!fs) panic("fs allocation failed");
-  fs->ops = &procfs_ops;
-  fs->ops->init(fs, "procfs");
-  vfs->mount("/proc", fs);
-
+  fs->ops = &kvfs_ops;
+  fs->ops->init(fs, "kvfs");
+  vfs->mount("/", fs);
+  vfs->unmount("/");
+  assert(vfs->open("/a.txt", O_RDONLY) != -1);
   TestLog("unmount_test passed.");
 }
 
@@ -227,5 +228,5 @@ void fs_test() {
   error_processing_test();
 
 
-  TestLog("fs_init_test end");
+  TestLog("fs_test end");
 }
