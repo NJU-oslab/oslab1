@@ -8,6 +8,8 @@ static void mount_test();
 static void error_processing_test();
 static void multithread_test();
 
+extern fsops_t procfs_ops;
+
 void alloc_test() {
   TestLog("alloc_test begin...");
   TestLog("intr_status: %d", _intr_read());
@@ -200,8 +202,8 @@ static void mount_test(){
   TestLog("mount_test begins...");
   filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
   if (!fs) panic("fs allocation failed");
+  fs->ops = &procfs_ops;
   fs->ops->init(fs, "procfs");
-  printf("fuck\n");
   vfs->mount("/proc", fs);
 
   TestLog("unmount_test passed.");
