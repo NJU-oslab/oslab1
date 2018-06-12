@@ -1,3 +1,6 @@
+#ifndef _LIBC_H
+#define _LIBC_H
+
 #include <stdint.h>
 #include <am.h>
 // string.h
@@ -18,3 +21,5 @@ int rand();
 int printf(const char* fmt, ...);
 int sprintf(char* out, const char* fmt, ...);
 int snprintf(char* s, size_t n, const char* fmt, ...);
+
+#endif

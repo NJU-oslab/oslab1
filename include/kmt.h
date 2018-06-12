@@ -1,3 +1,6 @@
+#ifndef _KMT_H
+#define _KMT_H
+
 #include "os.h"
 #define MAX_NAME_LEN 100
 #define MAX_STACK_SIZE 16 * 1024
@@ -23,4 +26,5 @@ typedef struct thread{
     struct thread *next;
 } thread_t;
 
+#endif
 

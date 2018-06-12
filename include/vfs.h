@@ -1,3 +1,6 @@
+#ifndef _VFS_H
+#define _VFS_H
+
 #include <os.h>
 #define MAX_FS_NAME_LEN 128
 #define MAX_INODE_NAME_LEN 128
@@ -60,13 +63,15 @@ struct inode{
 
 struct filesystem{
     char name[MAX_FS_NAME_LEN];
-    mount_path_t *path;
     fsops_t *ops;
     int fs_type;
     inode_t *inodes[MAX_INODE_NUM];
+    filesystem_t *next_fs_under_same_path;
 };
 
 struct mount_path{
     char name[MAX_PATH_LEN];
     filesystem_t *fs;
 };
+
+#endif

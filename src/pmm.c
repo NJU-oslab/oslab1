@@ -16,15 +16,6 @@ MOD_DEF(pmm) {
     .free = pmm_free
 };
 
-
-typedef union block {
-	struct {
-		union block* next;
-		size_t size;
-	}body;
-	long align;
-} Block;
-
 static Block base;
 static Block *freep = NULL;
 

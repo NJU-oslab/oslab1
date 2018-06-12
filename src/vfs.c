@@ -1,5 +1,6 @@
 #include "os.h"
 
+/* vfs API*/
 static void vfs_init();
 static int vfs_access(const char *path, int mode);
 static int vfs_mount(const char *path, filesystem_t *fs);
@@ -10,12 +11,21 @@ static ssize_t vfs_write(int fd, void *buf, size_t nbyte);
 static off_t vfs_lseek(int fd, off_t offset, int whence);
 static int vfs_close(int fd);
 
+/* fsops*/
+static void fsops_init(struct filesystem *fs, const char *name);
+static inode_t *fsops_lookup(struct filesystem *fs, const char *path);
+static int fsops_close(inode_t *inode);
+
+
+
+
 extern thread_t *thread_head;
 
 mount_path_t procfs_path;
 static mount_path_t devfs_path;
 static mount_path_t kvfs_path;
 static spinlock_t fs_lock;
+static void create_inodes(filesystem_t *fs, char can_read, char can_write, char *inode_name, char *content, mount_path_t *path);
 
 MOD_DEF(vfs){
     .init = vfs_init,
@@ -53,6 +63,7 @@ static void fsops_init(struct filesystem *fs, const char *name){
     }
     for (int i = 0; i < MAX_INODE_NUM; i++)
         fs->inodes[i] = NULL;
+    fs->next_fs_under_same_path = NULL;
     TRACE_EXIT;
 }
 
@@ -75,131 +86,19 @@ static int fsops_close(inode_t *inode){
 
 static void create_procinodes(filesystem_t *fs) {
     TRACE_ENTRY;
-    inode_t *cpuinfo_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
-    if (!cpuinfo_inode) panic("inode allocation failed");
-    cpuinfo_inode->can_read = 1;
-    cpuinfo_inode->can_write = 1;
-    cpuinfo_inode->open_thread_num = 0;
-    cpuinfo_inode->fs = fs;
-    strcpy(cpuinfo_inode->name, procfs_path.name);
-    strcat(cpuinfo_inode->name, "/cpuinfo");
-    strcpy(cpuinfo_inode->content, "This is the cpuinfo file.\n");
-    int i;
-    for (i = 0; i < MAX_INODE_NUM; i++){
-        if (procfs_path.fs->inodes[i] == NULL){
-            procfs_path.fs->inodes[i] = cpuinfo_inode;
-            break;
-        }
-    }
-    if (i == MAX_INODE_NUM){
-        Log("The procfs's inode pool is full.");
-        return;
-    }
-//    Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
-
-    inode_t *meminfo_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
-    if (!meminfo_inode) panic("inode allocation failed");
-    meminfo_inode->can_read = 1;
-    meminfo_inode->can_write = 1;
-    meminfo_inode->open_thread_num = 0;
-    meminfo_inode->fs = fs;
-    strcpy(meminfo_inode->name, procfs_path.name);
-    strcat(meminfo_inode->name, "/meminfo");
-    strcpy(meminfo_inode->content, "This is the meminfo file.\n");
-    for (i = 0; i < MAX_INODE_NUM; i++){
-        if (procfs_path.fs->inodes[i] == NULL){
-            procfs_path.fs->inodes[i] = meminfo_inode;
-            break;
-        }
-    }
-    if (i == MAX_INODE_NUM){
-        Log("The procfs's inode pool is full.");
-        return;
-    }
+    create_inodes(fs, 1, 0, "/cpuinfo", "This is the cpuinfo file.\n", &procfs_path);
+    create_inodes(fs, 1, 0, "/meminfo", "This is the meminfo file.\n", &procfs_path);
     TRACE_EXIT;
- //   Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
 }
 
 static void create_kvinodes(filesystem_t *fs){
-    inode_t *kv_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
-    if (!kv_inode) panic("inode allocation failed");
-    kv_inode->can_read = 1;
-    kv_inode->can_write = 1;
-    kv_inode->open_thread_num = 0;
-    kv_inode->fs = fs;
-    strcpy(kv_inode->name, kvfs_path.name);
-    strcat(kv_inode->name, "a.txt");
-    int i;
-    for (i = 0; i < MAX_INODE_NUM; i++){
-        if (kvfs_path.fs->inodes[i] == NULL){
-            kvfs_path.fs->inodes[i] = kv_inode;
-            break;
-        }
-    }
-    if (i == MAX_INODE_NUM){
-        Log("The kvfs's inode pool is full.");
-        return;
-    }
+    create_inodes(fs, 1, 1, "a.txt", NULL, &kvfs_path);
 }
 
 static void create_devinodes(filesystem_t *fs){
-    inode_t *null_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
-    if (!null_inode) panic("inode allocation failed");
-    null_inode->can_read = 1;
-    null_inode->can_write = 1;
-    null_inode->open_thread_num = 0;
-    null_inode->fs = fs;
-    strcpy(null_inode->name, devfs_path.name);
-    strcat(null_inode->name, "/null");
-    int i;
-    for (i = 0; i < MAX_INODE_NUM; i++){
-        if (devfs_path.fs->inodes[i] == NULL){
-            devfs_path.fs->inodes[i] = null_inode;
-            break;
-        }
-    }
-    if (i == MAX_INODE_NUM){
-        Log("The devfs's inode pool is full.");
-        return;
-    }
-
-    inode_t *zero_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
-    if (!zero_inode) panic("inode allocation failed");
-    zero_inode->can_read = 1;
-    zero_inode->can_write = 1;
-    zero_inode->open_thread_num = 0;
-    zero_inode->fs = fs;
-    strcpy(zero_inode->name, devfs_path.name);
-    strcat(zero_inode->name, "/zero");
-    for (i = 0; i < MAX_INODE_NUM; i++){
-        if (devfs_path.fs->inodes[i] == NULL){
-            devfs_path.fs->inodes[i] = zero_inode;
-            break;
-        }
-    }
-    if (i == MAX_INODE_NUM){
-        Log("The devfs's inode pool is full.");
-        return;
-    }
-
-    inode_t *random_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
-    if (!random_inode) panic("inode allocation failed");
-    random_inode->can_read = 1;
-    random_inode->can_write = 1;
-    random_inode->open_thread_num = 0;
-    random_inode->fs = fs;
-    strcpy(random_inode->name, devfs_path.name);
-    strcat(random_inode->name, "/random");
-    for (i = 0; i < MAX_INODE_NUM; i++){
-        if (devfs_path.fs->inodes[i] == NULL){
-            devfs_path.fs->inodes[i] = random_inode;
-            break;
-        }
-    }
-    if (i == MAX_INODE_NUM){
-        Log("The devfs's inode pool is full.");
-        return;
-    }
+    create_inodes(fs, 1, 1, "/null", NULL, &devfs_path);
+    create_inodes(fs, 1, 1, "/zero", NULL, &devfs_path);
+    create_inodes(fs, 1, 1, "/random", NULL, &devfs_path);
 }
 
 static filesystem_t *create_procfs() {
@@ -383,10 +282,60 @@ static int search_for_file_index(int fd){
     return i;
 }
 
+static void create_inodes(filesystem_t *fs, char can_read, char can_write, char *inode_name, char *content, mount_path_t *path){
+    inode_t *new_inode = (inode_t *)pmm->alloc(sizeof(inode_t));
+    if (!new_inode) panic("inode allocation failed");
+    new_inode->can_read = can_read;
+    new_inode->can_write = can_write;
+    new_inode->open_thread_num = 0;
+    new_inode->fs = fs;
+    strcpy(new_inode->name, path->name);
+    strcat(new_inode->name, inode_name);
+    if (content != NULL)
+        strcpy(new_inode->content, content);
+    int i;
+    for (i = 0; i < MAX_INODE_NUM; i++){
+        if (path->fs->inodes[i] == NULL){
+            path->fs->inodes[i] = new_inode;
+            break;
+        }
+    }
+    if (i == MAX_INODE_NUM){
+        Log("The fs's inode pool is full.");
+        return;
+    }
+}
+
+static void mount_new_fs(mount_path_t *path, filesystem_t *fs){
+    if (path->fs == NULL){
+        fs->next_fs_under_same_path = NULL;
+        path->fs = fs;
+    }
+    else{
+        fs->next_fs_under_same_path = path->fs;
+        path->fs = fs;
+    }
+}
+
+static void unmount_fs(mount_path_t *path){
+    if (path->fs == NULL){
+        panic("The path has no filesystem mounted on it. Unmounting failed.");
+    }
+    else{
+        path->fs = path->fs->next_fs_under_same_path;
+    }
+}
+
 // vfs initialization helper functions 
 
 static void spinlock_init(){
     kmt->spin_init(&fs_lock, "fs_lock");
+}
+
+static void path_init(){
+    strcpy(procfs_path.name, "/proc");
+    strcpy(devfs_path.name ,"/dev");
+    strcpy(kvfs_path.name, "/");
 }
 
 static void rand_init(){
@@ -434,6 +383,7 @@ static void fs_init(){
 
 static void vfs_init(){
     spinlock_init();
+    path_init();
     rand_init();
     pool_init();
     oop_func_init();
@@ -488,12 +438,12 @@ static int vfs_access(const char *path, int mode){
 
 static int vfs_mount(const char *path, filesystem_t *fs){
     kmt->spin_lock(&fs_lock);
-    switch (fs->fs_type){
-    case PROCFS: procfs_path.fs = fs; fs->path = &procfs_path; strcpy(procfs_path.name, path); break;
-    case DEVFS: devfs_path.fs = fs; fs->path = &devfs_path; strcpy(devfs_path.name, path); break;
-    case KVFS: kvfs_path.fs = fs; fs->path = &kvfs_path; strcpy(kvfs_path.name, path); break;
-    default: break;
-    }
+    if (strcmp(path, procfs_path.name) == 0 && fs->fs_type == PROCFS)
+        mount_new_fs(&procfs_path, fs);
+    else if (strcmp(path, devfs_path.name) == 0 && fs->fs_type == DEVFS)
+        mount_new_fs(&devfs_path, fs);
+    else if (strcmp(path, kvfs_path.name) == 0 && fs->fs_type == KVFS)
+        mount_new_fs(&kvfs_path, fs);
     kmt->spin_unlock(&fs_lock);
     return 0;
 }
@@ -501,16 +451,13 @@ static int vfs_mount(const char *path, filesystem_t *fs){
 static int vfs_unmount(const char *path){
     kmt->spin_lock(&fs_lock);
     if (strcmp(path, procfs_path.name) == 0){
-        procfs_path.fs = NULL;
-        procfs_path.fs->path = NULL;
+        unmount_fs(&procfs_path);
     }
     else if (strcmp(path, devfs_path.name) == 0){
-        devfs_path.fs = NULL;
-        devfs_path.fs->path = NULL;
+        unmount_fs(&devfs_path);
     }
     else if (strcmp(path, kvfs_path.name) == 0){
-        kvfs_path.fs = NULL;
-        kvfs_path.fs->path = NULL;
+        unmount_fs(&kvfs_path);
     }
     kmt->spin_unlock(&fs_lock);
     return 0;
