@@ -242,11 +242,11 @@ static void multiopen_test(){
 }
 
 void fs_test() {
-  TestLog("fs_test begin...");
+  TestLog("\n==================================\nfs_test begin...");
   procfs_test();
   devfs_test();
   kvfs_test();
   mount_test();
   multiopen_test();
-  TestLog("fs_test end");
+  TestLog("fs_test end\n==================================");
 }
