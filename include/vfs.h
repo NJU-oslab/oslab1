@@ -58,7 +58,7 @@ struct inode{
     int open_thread_num;
     char can_read;
     char can_write;
-    int pid;
+    thread_t *thread;
 };
 
 struct filesystem{

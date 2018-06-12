@@ -2,6 +2,7 @@
 #define _KMT_H
 
 #include "os.h"
+#include "vfs.h"
 #define MAX_NAME_LEN 100
 #define MAX_STACK_SIZE 16 * 1024
 
@@ -23,6 +24,7 @@ typedef struct thread{
     _RegSet *tf;
     _Area stack;
     sem_t *waiting_sem;
+    inode_t *inode;
     struct thread *next;
 } thread_t;
 
