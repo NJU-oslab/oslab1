@@ -489,6 +489,7 @@ static int vfs_unmount(const char *path){
         unmount_fs(&devfs_path);
     }
     else if (strcmp(path, kvfs_path.name) == 0){
+        printf("fuck.\n");
         unmount_fs(&kvfs_path);
     }
     kmt->spin_unlock(&fs_lock);
