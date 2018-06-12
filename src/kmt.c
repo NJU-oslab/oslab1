@@ -41,7 +41,7 @@ static void add_procfs_inodes(thread_t *thread){
     if (!new_proc_inode) panic("inode allocation failed");
 
     new_proc_inode->can_read = 1;
-    new_proc_inode->can_write = 0;
+    new_proc_inode->can_write = 1;
     new_proc_inode->open_thread_num = 0;
     new_proc_inode->pid = thread->tid;
     new_proc_inode->fs = procfs_path.fs;
@@ -76,6 +76,32 @@ static void add_procfs_inodes(thread_t *thread){
         return;
     }
  //   Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
+}
+
+static void update_procfs_inode(thread_t *thread){
+    char name[MAX_NAME_LEN], content[MAX_INODE_CONTENT_LEN];
+    char pid[10], runnable[10], tf[200];
+    sprintf(pid, "%d", thread->tid);
+    sprintf(runnable, "%d", thread->runnable);
+    sprintf(tf, "eax: 0x%x; ebx: 0x%x; ecx: 0x%x; edx: 0x%x; esi: 0x%x; edi: 0x%x; ebp: 0x%x; esp3: 0x%x",
+        thread->tf->eax, thread->tf->ebx, thread->tf->ecx, thread->tf->edx, thread->tf->esi, thread->tf->edi, 
+        thread->tf->ebp, thread->tf->esp3);
+
+    strcpy(name, procfs_path.name);
+    strcat(name, "/");
+    strcat(name, pid);
+    strcat(name, "/status");
+    strcpy(content, "pid: ");
+    strcat(content, pid);
+    strcat(content, "\nrunnable: ");
+    strcat(content, runnable);
+    strcat(content, "\nregs: ");
+    strcat(content, tf);
+    strcat(content, "\n");
+
+    int fd = vfs->open(name, O_RDWR);
+    vfs->write(fd, content, sizeof(content));
+    vfs->close(fd);
 }
 
 static void kmt_init(){
@@ -197,6 +223,7 @@ static thread_t *kmt_schedule(){
         else
             next_thread = thread_head;
     }
+    update_procfs_inode(next_thread);
     current_thread = next_thread;
     return next_thread;
 }
