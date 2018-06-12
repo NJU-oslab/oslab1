@@ -202,9 +202,9 @@ static void mount_test(){
   TestLog("mount_test begins...");
   filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
   if (!fs) panic("fs allocation failed");
-  fs->ops = &kvfs_ops;
-  fs->ops->init(fs, "kvfs");
+  fs->fs_type = KVFS;
   vfs->mount("/", fs);
+  assert(vfs->open("/a.txt", O_RDONLY) == -1);
   vfs->unmount("/");
   assert(vfs->open("/a.txt", O_RDONLY) != -1);
   TestLog("unmount_test passed.");
