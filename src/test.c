@@ -186,13 +186,13 @@ static void kvfs_test(){
     panic("open failed.\n");
   }
   assert(vfs->access("/a.txt", W_OK) == -1);
-  if (vfs->write(fd, "1234", 4) == -1)
+  if (vfs->write(fd, "114514114514114514", 4) == -1)
     panic("write failed");
-  vfs->lseek(fd, 1, SEEK_SET);
+  vfs->lseek(fd, 3, SEEK_SET);
   if (vfs->read(fd, buf, sizeof(buf) - 1) == -1)
     panic("read failed");
   printf("buf------\n%s\n", buf);
-  assert(strcmp(buf, "234") == 0);
+  assert(strcmp(buf, "514114514114514") == 0);
   vfs->close(fd);
   assert(vfs->access("/a.txt", F_OK) == 0);
   assert(vfs->access("/a.txt", R_OK) == 0);
@@ -245,7 +245,6 @@ static void multiopen_test(){
 static thread_t fs_test_thread2[2];
 
 static void fs_test_func2(void *arg){
-    printf("2333\n");
     int fd = vfs->open("/a.txt", O_RDONLY);
     char buf[10];
     vfs->read(fd, buf, sizeof(buf));
