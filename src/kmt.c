@@ -98,7 +98,6 @@ static void update_procfs_inode(thread_t *thread){
     strcat(content, "\nregs: ");
     strcat(content, tf);
     strcat(content, "\n");
-    printf("%s\n", name);
     int fd = vfs->open(name, O_RDWR);
     vfs->write(fd, content, sizeof(content));
     vfs->close(fd);
