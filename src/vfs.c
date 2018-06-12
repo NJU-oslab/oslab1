@@ -91,7 +91,7 @@ static void fsops_init(struct filesystem *fs, const char *name){
         else if (strcmp("kvfs", name) == 0)
             fs->fs_type = KVFS;
         else
-            Log("a filesystem is created but cannot be identified.");
+            panic("a filesystem is created but cannot be identified.");
     }
     for (int i = 0; i < MAX_INODE_NUM; i++)
         fs->inodes[i] = NULL;
@@ -178,7 +178,7 @@ static int fileops_open(inode_t *inode, file_t *file, int flags){
     case O_RDONLY: file->can_read = 1; file->can_write = 0; break;
     case O_WRONLY: file->can_write = 1; file->can_read = 0; break;
     case O_RDWR: file->can_read = 1; file->can_write = 1; break;
-    default: panic("undefined flags."); return -1;
+    default: printf("undefined flags."); return -1;
     }
 
     if (file->can_write == 1) inode->can_write = 0;
@@ -193,7 +193,7 @@ static int fileops_open(inode_t *inode, file_t *file, int flags){
         }
     }
     if (new_fd == MAX_FD_NUM){
-        printf("Fd pool is full. You cannot open more file anymore.");
+        printf("Fd pool is full. You cannot open more file anymore.\n");
         return -1;
     }
     file->fd = new_fd;
@@ -230,7 +230,7 @@ static ssize_t fileops_read(inode_t *inode, file_t *file, char *buf, size_t size
     if (size + file->open_offset > strlen(file->content)){
         size = strlen(file->content) - file->open_offset;
     }
-    printf("size: %d\n", size);
+    Log("size: %d\n", size);
     int i;
     for (i = 0; i < size; i++){
         buf[i] = file->content[i + file->open_offset];
@@ -275,7 +275,7 @@ static off_t fileops_lseek(inode_t *inode, file_t *file, off_t offset, int whenc
     case SEEK_SET: file->open_offset = offset; break;
     case SEEK_CUR: file->open_offset += offset; break;
     case SEEK_END: file->open_offset = strlen(file->content) + offset; break;
-    default: panic("Undefined whence.");
+    default: printf("Undefined whence.\n"); return -1;
     }
 
     if (file->open_offset > strlen(file->content))
@@ -308,7 +308,7 @@ static int search_for_file_index(int fd){
         }
     }
     if (i == MAX_FILE_NUM){
-        Log("Cannot find the fd, so lseek failed.");
+        printf("Cannot find the fd, so lseek failed.\n");
         return -1;
     }
     return i;
@@ -333,7 +333,7 @@ static void create_inodes(filesystem_t *fs, char can_read, char can_write, char 
         }
     }
     if (i == MAX_INODE_NUM){
-        Log("The fs's inode pool is full.");
+        printf("The fs's inode pool is full.\n");
         return;
     }
 }
@@ -351,7 +351,7 @@ static void mount_new_fs(mount_path_t *path, filesystem_t *fs){
 
 static void unmount_fs(mount_path_t *path){
     if (path->fs == NULL){
-        panic("The path has no filesystem mounted on it. Unmounting failed.");
+        printf("The path has no filesystem mounted on it. Unmounting failed.\n");
     }
     else{
         path->fs = path->fs->next_fs_under_same_path;
@@ -435,7 +435,7 @@ static int vfs_access(const char *path, int mode){
         open_inode = kvfs_path.fs->ops->lookup(kvfs_path.fs, path);
     }
     else{
-        Log("Cannot find the path.");
+        printf("Cannot find the path.\n");
         kmt->spin_unlock(&fs_lock);
         return -1;
     }
@@ -458,11 +458,11 @@ static int vfs_access(const char *path, int mode){
         }
         case X_OK:  kmt->spin_unlock(&fs_lock); return -1;
         case F_OK:  kmt->spin_unlock(&fs_lock); return 0;
-        default: Log("Undefined mode."); kmt->spin_unlock(&fs_lock); return -1;
+        default: printf("Undefined mode.\n"); kmt->spin_unlock(&fs_lock); return -1;
         }
     }
     else{
-        Log("Cannot find the path you want to lookup.");
+        printf("Cannot find the path you want to lookup.\n");
         kmt->spin_unlock(&fs_lock);
         return -1;
     }
@@ -508,7 +508,7 @@ static int vfs_open(const char *path, int flags){
         open_inode = kvfs_path.fs->ops->lookup(kvfs_path.fs, path);
     }
     else{
-        Log("Cannot find the path.");
+        printf("Cannot find the path.\n");
         kmt->spin_unlock(&fs_lock);
         return -1;
     }
@@ -524,7 +524,7 @@ static int vfs_open(const char *path, int flags){
         f->ops = &file_ops;
         ret_fd = f->ops->open(open_inode, f, flags);
         if (ret_fd < 0){
-            Log("file open error");
+            printf("file open error.\n");
             kmt->spin_unlock(&fs_lock);
             return -1;
         }
@@ -536,7 +536,7 @@ static int vfs_open(const char *path, int flags){
             }
         }
         if (i == MAX_FILE_NUM){
-            Log("File pool is full, you cannot open more files.");
+            printf("File pool is full, you cannot open more files.\n");
             kmt->spin_unlock(&fs_lock);
             return -1;
         }
@@ -544,7 +544,7 @@ static int vfs_open(const char *path, int flags){
         return ret_fd;
     }
     else{
-        Log("Cannot find the path you want to lookup.");
+        printf("Cannot find the path you want to lookup.\n");
         kmt->spin_unlock(&fs_lock);
         return -1;
     }
