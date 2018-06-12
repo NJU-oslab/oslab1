@@ -101,6 +101,7 @@ static void fsops_init(struct filesystem *fs, const char *name){
 
 static inode_t *fsops_lookup(struct filesystem *fs, const char *path){
     TRACE_ENTRY;
+    printf("f\n");
     for (int i = 0; i < MAX_INODE_NUM; i++){
         if (fs->inodes[i] != NULL && strcmp(fs->inodes[i]->name, path) == 0){
             TRACE_EXIT;
@@ -505,7 +506,6 @@ static int vfs_open(const char *path, int flags){
         open_inode = devfs_path.fs->ops->lookup(devfs_path.fs, path);
     }
     else if (strncmp(kvfs_path.name, path, strlen(kvfs_path.name)) == 0){
-        printf("f\n");
         open_inode = kvfs_path.fs->ops->lookup(kvfs_path.fs, path);
     }
     else{
