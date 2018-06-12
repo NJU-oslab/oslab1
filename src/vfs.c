@@ -181,7 +181,10 @@ static int fileops_open(inode_t *inode, file_t *file, int flags){
     default: printf("undefined flags."); return -1;
     }
 
-    if (file->can_write == 1) inode->can_write = 0;
+    if (file->can_write == 1) {
+        inode->can_write = 0;
+        inode->can_read = 0;
+    }
     inode->open_thread_num++;
     file->f_inode = inode;
 

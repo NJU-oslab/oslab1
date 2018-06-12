@@ -6,6 +6,7 @@ static void devfs_test();
 static void kvfs_test();
 static void mount_test();
 static void multiopen_test();
+static void multithread_test();
 
 extern fsops_t kvfs_ops;
 
@@ -241,6 +242,23 @@ static void multiopen_test(){
   TestLog("multiopen_test passed.");
 }
 
+static thread_t fs_test_thread2[2];
+
+static void fs_test_func2(){
+    int fd = vfs->open("/a.txt", O_RDONLY);
+    char buf[10];
+    vfs->read(fd, buf, sizeof(buf));
+    printf("buf: %s\n", buf);
+    while (1);
+}
+
+static void multithread_test(){
+  TestLog("multithread_test begins...");
+  kmt->create(&fs_test_thread2[0], fs_test_func2, NULL);
+  kmt->create(&fs_test_thread2[1], fs_test_func2, NULL);
+  TestLog("multithread_test ends.");
+}
+
 void fs_test() {
   TestLog("\n==================================\nfs_test begin...");
   procfs_test();
@@ -248,5 +266,6 @@ void fs_test() {
   kvfs_test();
   mount_test();
   multiopen_test();
+  multithread_test();
   TestLog("fs_test end\n==================================");
 }
