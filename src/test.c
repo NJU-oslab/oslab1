@@ -138,7 +138,7 @@ static void procfs_test(){
   kmt->teardown(&fs_test_thread[2]);
   TestLog("Thread 2 deleted.");
   print_proc_inodes();
-  int fd = vfs->open("/proc/1/status", O_RDWR);
+  int fd = vfs->open("/proc/1/status", O_RDONLY);
   if (fd == -1){
     panic("open failed.\n");
   }
@@ -147,12 +147,6 @@ static void procfs_test(){
   if (vfs->read(fd, buf, sizeof(buf) - 1) == -1)
     panic("read failed");
   printf("buf------\n%s\n", buf);
-  if (vfs->write(fd, "1234", 4) == -1)
-    panic("write failed");
-  if (vfs->read(fd, buf, sizeof(buf) - 1) == -1)
-    panic("read failed");
-  printf("buf------\n%s\n", buf);
-  assert(strcmp(buf, "1234") == 0);
   vfs->close(fd);
   assert(vfs->access("/proc/1/status", F_OK) == 0);
   assert(vfs->access("/proc/1/status", R_OK) == 0);
@@ -196,6 +190,7 @@ static void kvfs_test(){
   if (vfs->read(fd, buf, sizeof(buf) - 1) == -1)
     panic("read failed");
   printf("buf------\n%s\n", buf);
+  assert(strcmp(buf, "234") == 0);
   vfs->close(fd);
   assert(vfs->access("/a.txt", F_OK) == 0);
   assert(vfs->access("/a.txt", R_OK) == 0);

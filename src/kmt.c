@@ -41,7 +41,7 @@ static void add_procfs_inodes(thread_t *thread){
     if (!new_proc_inode) panic("inode allocation failed");
 
     new_proc_inode->can_read = 1;
-    new_proc_inode->can_write = 1;
+    new_proc_inode->can_write = 0;
     new_proc_inode->open_thread_num = 0;
     new_proc_inode->pid = thread->tid;
     new_proc_inode->fs = procfs_path.fs;
