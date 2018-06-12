@@ -157,7 +157,7 @@ static void procfs_test(){
   assert(vfs->access("/proc/1/status", R_OK) == 0);
   assert(vfs->access("/proc/1/status", W_OK) == 0);
   assert(vfs->access("/proc/1/status", X_OK) == -1);
-  TestLog("procfs_test end.");
+  TestLog("procfs_test passed.");
 }
 
 static void devfs_test(){
@@ -171,12 +171,12 @@ static void devfs_test(){
   }
   printf("\n");
   int fd = vfs->open("/dev/null", O_RDONLY);
-  assert(fd == 0);
   assert(vfs->read(fd, buf, sizeof(buf)) == -1);
-  TestLog("devfs_test ends.");
+  TestLog("devfs_test passed.");
 }
 
 static void kvfs_test(){
+  TestLog("kvfs_test begins...");
   int fd = vfs->open("/a.txt", O_RDWR);
   char buf[20];
   if (fd == -1){
@@ -193,6 +193,7 @@ static void kvfs_test(){
   assert(vfs->access("/a.txt", R_OK) == 0);
   assert(vfs->access("/a.txt", W_OK) == 0);
   assert(vfs->access("/a.txt", X_OK) == -1);
+  TestLog("kvfs_test passed.");
 }
 
 static void mount_test(){
