@@ -239,9 +239,9 @@ static void multiopen_test(){
   assert(fd2 != -1);
   fd3 = vfs->open("/a.txt", O_WRONLY);
   assert(fd3 == -1);
-  vfs->close(fd1);
-  vfs->close(fd2);
-  vfs->close(fd3);
+  assert(vfs->close(fd1) == 0);
+  assert(vfs->close(fd2) == 0);
+  assert(vfs->close(fd3) == -1);
   TestLog("multiopen_test passed.");
 }
 
