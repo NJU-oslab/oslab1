@@ -91,7 +91,6 @@ static void add_procfs_inodes(thread_t *thread){
         Log("The procfs's inode pool is full.");
         return;
     }
-    thread->inode = new_proc_inode;
  //   Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
 }
 
