@@ -201,6 +201,7 @@ static void mount_test(){
   filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
   if (!fs) panic("fs allocation failed");
   fs->ops->init(fs, "procfs");
+  printf("fuck\n");
   vfs->mount("/proc", fs);
 
   TestLog("unmount_test passed.");
