@@ -181,7 +181,7 @@ static void devfs_test(){
 static void kvfs_test(){
   TestLog("kvfs_test begins...");
   int fd = vfs->open("/a.txt", O_RDWR);
-  char buf[20];
+  char buf[100];
   if (fd == -1){
     panic("open failed.\n");
   }
@@ -246,7 +246,7 @@ static thread_t fs_test_thread2[2];
 
 static void fs_test_func2(void *arg){
     int fd = vfs->open("/a.txt", O_RDONLY);
-    char buf[10];
+    char buf[100];
     vfs->read(fd, buf, sizeof(buf));
     vfs->close(fd);
     printf("buf: %s\n", buf);
