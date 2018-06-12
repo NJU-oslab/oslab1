@@ -11,11 +11,44 @@ static ssize_t vfs_write(int fd, void *buf, size_t nbyte);
 static off_t vfs_lseek(int fd, off_t offset, int whence);
 static int vfs_close(int fd);
 
-/* fsops*/
+/* fs's operations*/
 static void fsops_init(struct filesystem *fs, const char *name);
 static inode_t *fsops_lookup(struct filesystem *fs, const char *path);
 static int fsops_close(inode_t *inode);
 
+/* create inodes*/
+static void create_inodes(filesystem_t *fs, char can_read, char can_write, char *inode_name, char *content, mount_path_t *path);
+static void create_procinodes(filesystem_t *fs);
+static void create_kvinodes(filesystem_t *fs);
+static void create_devinodes(filesystem_t *fs);
+
+/* create filesystem*/
+static filesystem_t *create_procfs();
+static filesystem_t *create_devfs();
+static filesystem_t *create_kvfs();
+
+/* file's operations */
+static int fileops_open(inode_t *inode, file_t *file, int flags);
+static ssize_t fileops_read(inode_t *inode, file_t *file, char *buf, size_t size);
+static ssize_t fileops_write(inode_t *inode, file_t *file, const char *buf, size_t size);
+static off_t fileops_lseek(inode_t *inode, file_t *file, off_t offset, int whence);
+static int fileops_close(inode_t *inode, file_t *file);
+
+/* helper functions*/
+static int search_for_file_index(int fd);
+static void mount_new_fs(mount_path_t *path, filesystem_t *fs);
+static void unmount_fs(mount_path_t *path);
+
+/* initialization*/
+static void spinlock_init();
+static void path_init();
+static void rand_init();
+static void pool_init();
+static void oop_func_init();
+static void fs_init();
+
+/* debugging*/
+void print_proc_inodes();
 
 
 
@@ -25,7 +58,6 @@ mount_path_t procfs_path;
 static mount_path_t devfs_path;
 static mount_path_t kvfs_path;
 static spinlock_t fs_lock;
-static void create_inodes(filesystem_t *fs, char can_read, char can_write, char *inode_name, char *content, mount_path_t *path);
 
 MOD_DEF(vfs){
     .init = vfs_init,
