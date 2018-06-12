@@ -186,7 +186,7 @@ static void kvfs_test(){
     panic("open failed.\n");
   }
   assert(vfs->access("/a.txt", W_OK) == -1);
-  if (vfs->write(fd, "114514114514114514", 4) == -1)
+  if (vfs->write(fd, "114514114514114514", 18) == -1)
     panic("write failed");
   vfs->lseek(fd, 3, SEEK_SET);
   if (vfs->read(fd, buf, sizeof(buf) - 1) == -1)
