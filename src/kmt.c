@@ -223,9 +223,9 @@ static thread_t *kmt_schedule(){
         else
             next_thread = thread_head;
     }
-//   if (next_thread != NULL)
+   if (next_thread != NULL)
 //        update_procfs_inode(next_thread);
-    current_thread = next_thread;
+//    current_thread = next_thread;
     return next_thread;
 }
 static void kmt_spin_init(spinlock_t *lk, const char *name){
