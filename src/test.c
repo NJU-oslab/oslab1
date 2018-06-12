@@ -6,7 +6,7 @@ static void devfs_test();
 static void kvfs_test();
 static void mount_test();
 static void error_processing_test();
-static void multithread_test();
+static void multiopen_test();
 
 extern fsops_t kvfs_ops;
 
@@ -174,8 +174,10 @@ static void devfs_test(){
   printf("\n");
   int fd = vfs->open("/dev/null", O_RDONLY);
   assert(vfs->read(fd, buf, sizeof(buf)) == -1);
+  vfs->close(fd);
   fd = vfs->open("/dev/zero", O_RDONLY);
   vfs->read(fd, buf, sizeof(buf));
+  vfs->close(fd);
   for (int i = 0; i < 10; i++)
     assert(buf[i] == 0);
   TestLog("devfs_test passed.");
@@ -204,30 +206,32 @@ static void kvfs_test(){
 
 static void mount_test(){
   TestLog("mount_test begins...");
+  int fd;
   filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
   if (!fs) panic("fs allocation failed");
   fs->fs_type = KVFS;
   fs->ops = &kvfs_ops;
   vfs->mount("/", fs);
-  assert(vfs->open("/a.txt", O_RDONLY) == -1);
-
+  assert((fd = vfs->open("/a.txt", O_RDONLY)) == -1);
+  vfs->close(fd);
   fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
   if (!fs) panic("fs allocation failed");
   fs->fs_type = KVFS;
   fs->ops = &kvfs_ops;
   vfs->mount("/", fs);
-  assert(vfs->open("/a.txt", O_RDONLY) == -1);
-
+  assert((fd = vfs->open("/a.txt", O_RDONLY)) == -1);
+  vfs->close(fd);
   vfs->unmount("/");
-  assert(vfs->open("/a.txt", O_RDONLY) == -1);
-
+  assert((fd = vfs->open("/a.txt", O_RDONLY)) == -1);
+  vfs->close(fd);
   vfs->unmount("/");
-  assert(vfs->open("/a.txt", O_RDONLY) != -1);
+  assert((fd = vfs->open("/a.txt", O_RDONLY)) != -1);
+  vfs->close(fd);
   TestLog("unmount_test passed.");
 }
 
-static void multithread_test(){
-
+static void multiopen_test(){
+ 
 }
 
 static void error_processing_test(){
@@ -240,7 +244,7 @@ void fs_test() {
   devfs_test();
   kvfs_test();
   mount_test();
-  multithread_test();
+  multiopen_test();
   error_processing_test();
 
 
