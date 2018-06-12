@@ -193,6 +193,7 @@ static void kvfs_test(){
   assert(vfs->access("/a.txt", W_OK) == -1);
   if (vfs->write(fd, "1234", 4) == -1)
     panic("write failed");
+  vfs->lseek(fd, 1, SEEK_SET);
   if (vfs->read(fd, buf, sizeof(buf) - 1) == -1)
     panic("read failed");
   printf("buf------\n%s\n", buf);
@@ -245,10 +246,6 @@ static void multiopen_test(){
   TestLog("multiopen_test passed.");
 }
 
-static void error_processing_test(){
-
-}
-
 void fs_test() {
   TestLog("fs_test begin...");
   procfs_test();
@@ -256,8 +253,5 @@ void fs_test() {
   kvfs_test();
   mount_test();
   multiopen_test();
-  error_processing_test();
-
-
   TestLog("fs_test end");
 }
