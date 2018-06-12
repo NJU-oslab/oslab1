@@ -505,6 +505,7 @@ static int vfs_open(const char *path, int flags){
         open_inode = devfs_path.fs->ops->lookup(devfs_path.fs, path);
     }
     else if (strncmp(kvfs_path.name, path, strlen(kvfs_path.name)) == 0){
+        printf("f\n");
         open_inode = kvfs_path.fs->ops->lookup(kvfs_path.fs, path);
     }
     else{

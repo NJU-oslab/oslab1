@@ -206,7 +206,6 @@ static void mount_test(){
   vfs->mount("/", fs);
   printf("1\n");
   assert(vfs->open("/a.txt", O_RDONLY) == -1);
-  printf("2\n");
   vfs->unmount("/");
   assert(vfs->open("/a.txt", O_RDONLY) != -1);
   TestLog("unmount_test passed.");
