@@ -177,7 +177,8 @@ static void devfs_test(){
 }
 
 static void kvfs_test(){
-  fd = vfs->open("/a.txt", O_RDWR);
+  int fd = vfs->open("/a.txt", O_RDWR);
+  char buf[20];
   if (fd == -1){
     panic("open failed.\n");
   }
@@ -203,7 +204,7 @@ static void multithread_test(){
 }
 
 static void error_processing_test(){
-  
+
 }
 
 void fs_test() {
