@@ -20,7 +20,6 @@ static spinlock_t sem_lock;
 
 thread_t * thread_head = NULL;
 extern mount_path_t procfs_path;
-extern ssize_t vfs_write_for_kmt(int fd, void *buf, size_t nbyte);
 
 MOD_DEF(kmt) {
     .init = kmt_init,
@@ -78,7 +77,7 @@ static void add_procfs_inodes(thread_t *thread){
     }
  //   Log("cpuinfo created.\nname: %s\ncontent:\n%s\n", procfs_path.fs->inodes[i]->name, procfs_path.fs->inodes[i]->content);
 }
-
+/*
 static void update_procfs_inode(thread_t *thread){
     char name[MAX_NAME_LEN], content[MAX_INODE_CONTENT_LEN];
     char pid[10], runnable[10], tf[200];
@@ -103,7 +102,7 @@ static void update_procfs_inode(thread_t *thread){
     int fd = vfs->open(name, O_RDWR);
     vfs_write_for_kmt(fd, content, sizeof(content));
     vfs->close(fd);
-}
+}*/
 
 static void kmt_init(){
     current_thread = NULL;
@@ -224,8 +223,8 @@ static thread_t *kmt_schedule(){
         else
             next_thread = thread_head;
     }
-   if (next_thread != NULL)
-        update_procfs_inode(next_thread);
+ //  if (next_thread != NULL)
+ //       update_procfs_inode(next_thread);
     current_thread = next_thread;
     return next_thread;
 }
