@@ -143,6 +143,7 @@ static void procfs_test(){
     panic("open failed.\n");
   }
   assert(vfs->access("/proc/1/status", W_OK) == -1);
+  assert(vfs->access("/proc/1/status", R_OK) == 0);
   char buf[200];
   if (vfs->read(fd, buf, sizeof(buf) - 1) == -1)
     panic("read failed");
