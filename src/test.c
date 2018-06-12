@@ -204,6 +204,7 @@ static void mount_test(){
   if (!fs) panic("fs allocation failed");
   fs->fs_type = KVFS;
   vfs->mount("/", fs);
+  printf("fuck.\n");
   assert(vfs->open("/a.txt", O_RDONLY) == -1);
   vfs->unmount("/");
   assert(vfs->open("/a.txt", O_RDONLY) != -1);
