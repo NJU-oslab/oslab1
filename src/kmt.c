@@ -43,7 +43,7 @@ static void add_procfs_inodes(thread_t *thread){
     new_proc_inode->can_read = 1;
     new_proc_inode->can_write = 1;
     new_proc_inode->open_thread_num = 0;
-    new_proc_inode->pid = thread->tid;
+    new_proc_inode->thread = thread;
     new_proc_inode->fs = procfs_path.fs;
 
     char pid[10], runnable[10], tf[200];
@@ -146,7 +146,7 @@ static void kmt_teardown(thread_t *thread){
                 thread_t *p = cur->next;
                 int i;
                 for (i = 0; i < MAX_INODE_NUM; i++){
-                    if (procfs_path.fs->inodes[i]->pid == cur->next->tid){
+                    if (procfs_path.fs->inodes[i]->thread->tid == cur->next->tid){
                         pmm->free(procfs_path.fs->inodes[i]);
                         procfs_path.fs->inodes[i] = NULL;
                         break;

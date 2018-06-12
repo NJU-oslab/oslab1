@@ -324,6 +324,7 @@ static void create_inodes(filesystem_t *fs, char can_read, char can_write, char 
     new_inode->can_write = can_write;
     new_inode->open_thread_num = 0;
     new_inode->fs = fs;
+    new_inode->thread = NULL;
     strcpy(new_inode->name, path->name);
     strcat(new_inode->name, inode_name);
     if (content != NULL)
@@ -605,6 +606,7 @@ static int vfs_close(int fd){
 
 void print_proc_inodes(){
     filesystem_t *fs = procfs_path.fs;
+    if (!fs) return;
     int i;
     for (i = 0; i < MAX_INODE_NUM; i++){
         if (fs->inodes[i] != NULL){
