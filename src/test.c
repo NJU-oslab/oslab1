@@ -244,8 +244,7 @@ static void multiopen_test(){
 
 static thread_t fs_test_thread2[2];
 
-static void fs_test_func2(){
-    printf("233\n");
+static void fs_test_func2(void *arg){
     int fd = vfs->open("/a.txt", O_RDONLY);
     char buf[10];
     vfs->read(fd, buf, sizeof(buf));
