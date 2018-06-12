@@ -5,7 +5,7 @@ static void procfs_test();
 static void devfs_test();
 static void kvfs_test();
 static void mount_test();
-static void error_processing_test();
+static void multiopen_test();
 
 extern fsops_t kvfs_ops;
 
