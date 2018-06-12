@@ -241,6 +241,7 @@ static void multiopen_test(){
   assert(fd3 == -1);
   vfs->close(fd1);
   vfs->close(fd2);
+  vfs->close(fd3);
   TestLog("multiopen_test passed.");
 }
 
