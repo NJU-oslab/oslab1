@@ -257,7 +257,7 @@ static void fs_test_func2(void *arg){
 static void multithread_test(){
   TestLog("multithread_test begins...");
   kmt->create(&fs_test_thread2[0], fs_test_func2, NULL);
-  kmt->create(&fs_test_thread2[1], fs_test_func2, NULL);
+//  kmt->create(&fs_test_thread2[1], fs_test_func2, NULL);
   TestLog("multithread_test ends.");
 }
 
