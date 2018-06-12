@@ -245,7 +245,7 @@ static void multiopen_test(){
 static thread_t fs_test_thread2[2];
 
 static void fs_test_func2(void *arg){
-
+    printf("fuck\n");
     int fd = vfs->open("/a.txt", O_RDONLY);
     char buf[10];
     vfs->read(fd, buf, sizeof(buf));
@@ -257,7 +257,7 @@ static void fs_test_func2(void *arg){
 static void multithread_test(){
   TestLog("multithread_test begins...");
   kmt->create(&fs_test_thread2[0], fs_test_func2, NULL);
-//  kmt->create(&fs_test_thread2[1], fs_test_func2, NULL);
+  kmt->create(&fs_test_thread2[1], fs_test_func2, NULL);
   TestLog("multithread_test ends.");
 }
 
