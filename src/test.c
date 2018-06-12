@@ -197,7 +197,13 @@ static void kvfs_test(){
 }
 
 static void mount_test(){
+  TestLog("mount_test begins...");
+  filesystem_t *fs = (filesystem_t *)pmm->alloc(sizeof(filesystem_t));
+  if (!fs) panic("fs allocation failed");
+  fs->ops->init(fs, "procfs");
+  vfs->mount("/proc", fs);
 
+  TestLog("unmount_test passed.");
 }
 
 static void multithread_test(){
