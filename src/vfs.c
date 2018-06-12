@@ -498,54 +498,6 @@ static int vfs_unmount(const char *path){
     return 0;
 }
 
-int vfs_open_for_kmt(const char *path, int flags){
-    inode_t *open_inode = NULL;
-    if (strncmp(procfs_path.name, path, strlen(procfs_path.name)) == 0){
-        open_inode = procfs_path.fs->ops->lookup(procfs_path.fs, path);
-    }
-    else if (strncmp(devfs_path.name, path, strlen(devfs_path.name)) == 0){
-        open_inode = devfs_path.fs->ops->lookup(devfs_path.fs, path);
-    }
-    else if (strncmp(kvfs_path.name, path, strlen(kvfs_path.name)) == 0){
-        open_inode = kvfs_path.fs->ops->lookup(kvfs_path.fs, path);
-    }
-    else{
-        printf("Cannot find the path.\n");
-        return -1;
-    }
-
-    if (open_inode != NULL){
-        int ret_fd = -1;
-        file_t *f = (file_t *)pmm->alloc(sizeof(file_t));
-        if (!f) {
-            panic("file allocation failed");
-            return -1;
-        }
-        f->ops = &file_ops;
-        ret_fd = f->ops->open(open_inode, f, flags);
-        if (ret_fd < 0){
-            printf("file open error.\n");
-            return -1;
-        }
-        int i;
-        for (i = 3; i < MAX_FILE_NUM; i++){
-            if (file_pool[i] == NULL){
-                file_pool[i] = f;
-                break;
-            }
-        }
-        if (i == MAX_FILE_NUM){
-            printf("File pool is full, you cannot open more files.\n");
-            return -1;
-        }
-        return ret_fd;
-    }
-    else{
-        printf("Cannot find the path you want to lookup.\n");
-        return -1;
-    }
-}
-
 static int vfs_open(const char *path, int flags){
     kmt->spin_lock(&fs_lock);
     inode_t *open_inode = NULL;
@@ -613,15 +565,6 @@ static ssize_t vfs_read(int fd, void *buf, size_t nbyte){
     return ret;
 }
 
-ssize_t vfs_write_for_kmt(int fd, void *buf, size_t nbyte){
-    int file_index = search_for_file_index(fd);
-    if (file_index == -1){
-        return -1;
-    }
-    ssize_t ret = file_pool[file_index]->ops->write(file_pool[file_index]->f_inode, file_pool[file_index], buf, nbyte);
-    return ret;
-}
-
 static ssize_t vfs_write(int fd, void *buf, size_t nbyte){
     kmt->spin_lock(&fs_lock);
     int file_index = search_for_file_index(fd);
@@ -643,15 +586,6 @@ static off_t vfs_lseek(int fd, off_t offset, int whence){
     }
     off_t ret = file_pool[file_index]->ops->lseek(file_pool[file_index]->f_inode, file_pool[file_index], offset, whence);
     kmt->spin_unlock(&fs_lock);
-    return ret;
-}
-
-int vfs_close_for_kmt(int fd){
-    int file_index = search_for_file_index(fd);
-    if (file_index == -1) {
-        return -1;
-    }
-    int ret =  file_pool[file_index]->ops->close(file_pool[file_index]->f_inode, file_pool[file_index]);
     return ret;
 }
 
