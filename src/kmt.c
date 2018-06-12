@@ -100,6 +100,7 @@ static void update_procfs_inode(thread_t *thread){
     strcat(content, "\n");
 
     int fd = vfs->open(name, O_RDWR);
+    printf("fd: %d\n", fd);
     vfs->write(fd, content, sizeof(content));
     vfs->close(fd);
 }
